@@ -14,6 +14,11 @@ var (
 	ErrNoFrontMatter = errors.New("no front matter found")
 )
 
+var (
+	YAMLSeparator = []byte("---")
+	NewLine       = []byte("\n")
+)
+
 type FrontMatter struct {
 	content []byte
 	data    map[string]interface{}

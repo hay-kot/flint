@@ -24,16 +24,12 @@ func (b BuiltIns) Required(fm frontmatter.FrontMatter, keys *set.Set[string]) er
 	missing := fmKeys.Missing(keys)
 
 	if missing.Len() > 0 {
-		var errors []string
-		for _, key := range missing.Slice() {
-			errors = append(errors, key)
-		}
 
 		return ErrorKeysRequired{
 			ID:          b.ID,
 			Level:       b.Level,
 			Description: b.Description,
-			Fields:      errors,
+			Fields:      missing.Slice(),
 		}
 	}
 

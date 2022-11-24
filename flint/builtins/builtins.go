@@ -13,9 +13,3 @@ func New(id, level, desc string) BuiltIns {
 		Description: desc,
 	}
 }
-
-func (b BuiltIns) Reset(id, level, desc string) {
-	b.ID = id
-	b.Level = level
-	b.Description = desc
-}
