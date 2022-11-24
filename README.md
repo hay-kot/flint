@@ -123,7 +123,8 @@ checks to see if the date is in the correct format. The format is defined using 
     level: error
     description: "date is not in correct format"
     builtin.date:
-      format: "2006-01-02"
+      format:
+        - "2006-01-02"
       fields:
         - "date"
 ```
