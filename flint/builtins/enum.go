@@ -29,7 +29,7 @@ func (b BuiltIns) Enum(fm frontmatter.FrontMatter, values []string, fields []str
 
 			errGroup.Errors = append(errGroup.Errors, ErrGroupValue{
 				Line:        xy,
-				Description: fmt.Sprintf("value %q is not allowed values", v),
+				Description: fmt.Sprintf("%q is not an allowed values", v),
 				Field:       field,
 			})
 		}
@@ -56,14 +56,4 @@ func (b BuiltIns) Enum(fm frontmatter.FrontMatter, values []string, fields []str
 	}
 
 	return nil
-}
-
-func isStrSlice(v []any) bool {
-	for _, vv := range v {
-		if _, ok := vv.(string); !ok {
-			return false
-		}
-	}
-
-	return true
 }

@@ -24,17 +24,23 @@ type RuleMatch struct {
 	Fields []string `yaml:"fields"`
 }
 
+type RuleDateFormat struct {
+	Fields []string `yaml:"fields"`
+	Format []string `yaml:"format"`
+}
+
 type RuleEnum struct {
 	Values []string `yaml:"values"`
 	Fields []string `yaml:"fields"`
 }
 
 type Rule struct {
-	Description string    `yaml:"description"`
-	Level       string    `yaml:"level"`
-	Required    []string  `yaml:"builtin.required"`
-	Match       RuleMatch `yaml:"builtin.match"`
-	Enum        RuleEnum  `yaml:"builtin.enum"`
+	Description string         `yaml:"description"`
+	Level       string         `yaml:"level"`
+	Required    []string       `yaml:"builtin.required"`
+	Match       RuleMatch      `yaml:"builtin.match"`
+	Enum        RuleEnum       `yaml:"builtin.enum"`
+	DateFormat  RuleDateFormat `yaml:"builtin.date"`
 }
 
 func (r Rule) Check(id string, fm frontmatter.FrontMatter) error {
@@ -56,6 +62,12 @@ func (r Rule) Check(id string, fm frontmatter.FrontMatter) error {
 
 	if len(r.Enum.Values) > 0 {
 		if err := check.Enum(fm, r.Enum.Values, r.Enum.Fields); err != nil {
+			errors = append(errors, err)
+		}
+	}
+
+	if len(r.DateFormat.Format) > 0 {
+		if err := check.DateFormat(fm, r.DateFormat.Format, r.DateFormat.Fields); err != nil {
 			errors = append(errors, err)
 		}
 	}

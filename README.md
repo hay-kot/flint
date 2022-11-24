@@ -18,10 +18,9 @@ This library is still experimental and probably broken. Use at your own risk.
   - Required fields
   - Regex matching
   - Enums Sets
+  - Date Format
   - <s>Field types</s> (coming soon!)
   - <s>Field length</s> (coming soon!)
-  - <s>Parsable Date</s> (coming soon!)
-  - <s>Date Format</s> (coming soon!)
   - <s>Asset Existence</s> (coming soon!)
 
 ## Installation
@@ -113,6 +112,20 @@ Supported types are `string` and `[]string`
       fields:
         - "category"
         - "post.category"
+```
+
+##### `builtin.date`
+
+checks to see if the date is in the correct format. The format is defined using the [Go time package](https://golang.org/pkg/time/#pkg-constants)
+
+```yaml
+  FM005:
+    level: error
+    description: "date is not in correct format"
+    builtin.date:
+      format: "2006-01-02"
+      fields:
+        - "date"
 ```
 
 #### Content
