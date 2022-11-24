@@ -1,30 +1,11 @@
 package builtins
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
 	"github.com/hay-kot/flint/pkgs/frontmatter"
 )
-
-type ErrorMatch struct {
-	Line  string
-	Match string
-	Field string
-	Value string
-}
-
-type MatchErrors struct {
-	ID          string
-	Level       string
-	Description string
-	Errors      []ErrorMatch
-}
-
-func (m MatchErrors) Error() string {
-	return "match failed"
-}
 
 func (b BuiltIns) Match(fm frontmatter.FrontMatter, re, fields []string) error {
 	compiled := make([]*regexp.Regexp, 0, len(re))
@@ -35,7 +16,7 @@ func (b BuiltIns) Match(fm frontmatter.FrontMatter, re, fields []string) error {
 
 	data := fm.Data()
 
-	errors := MatchErrors{
+	errors := ErrGroup{
 		ID:          b.ID,
 		Level:       b.Level,
 		Description: b.Description,
@@ -53,17 +34,11 @@ func (b BuiltIns) Match(fm frontmatter.FrontMatter, re, fields []string) error {
 		case string:
 			for _, re := range compiled {
 				if !re.MatchString(v) {
-					x, y := fm.KeyCords(field)
+					xy := fmtKeyCords(fm.KeyCords(field))
 
-					xy := fmt.Sprintf("%d:%d", x, y)
-					if x == -1 {
-						xy = "0:0"
-					}
-
-					errors.Errors = append(errors.Errors, ErrorMatch{
+					errors.Errors = append(errors.Errors, ErrGroupValue{
 						Line:  xy,
 						Field: field,
-						Value: v,
 					})
 				}
 			}

@@ -52,7 +52,7 @@ func TestBuiltIns_Match(t *testing.T) {
 			err := checks.Match(fm, tt.args.re, tt.args.fields)
 
 			if tt.wantErr {
-				assert.ErrorAs(t, err, &MatchErrors{})
+				assert.ErrorAs(t, err, &ErrGroup{})
 			} else {
 				assert.NoError(t, err)
 			}

@@ -7,8 +7,12 @@ nested:
   slug: "foo"
 tags:
   - foo
+  - bar
+  - baz
 categories:
   - foo
+  - bar
+  - baz
 key:
-  nested: value
+  nested: value_enum
 ---`

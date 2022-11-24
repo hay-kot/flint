@@ -16,6 +16,15 @@ var (
 	StyleWarning    = lipgloss.NewStyle().Foreground(lipgloss.Color("#F25D18"))
 )
 
+func or[T comparable](a, b T) T {
+	var zero T
+
+	if a != zero {
+		return a
+	}
+	return b
+}
+
 func FmtFileErrors(path string, e []error) string {
 	bldr := strings.Builder{}
 	bldr.WriteString(StyleFilePath.Render(path))
@@ -46,13 +55,13 @@ func FmtFileErrors(path string, e []error) string {
 						err.ID,
 					})
 				}
-			case builtins.MatchErrors:
+			case builtins.ErrGroup:
 				for _, m := range err.Errors {
 					cols = append(cols, []string{
 						m.Line,
 						err.Level,
 						m.Field,
-						err.Description,
+						or(m.Description, err.Description),
 						err.ID,
 					})
 				}

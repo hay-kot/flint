@@ -1,6 +1,10 @@
 package builtins
 
-import "github.com/hay-kot/flint/pkgs/set"
+import (
+	"fmt"
+
+	"github.com/hay-kot/flint/pkgs/set"
+)
 
 func extractKeys(mp map[string]any) *set.Set[string] {
 	keys := set.New[string]()
@@ -41,4 +45,12 @@ func extractValue(mp map[string]any, parts []string) (any, bool) {
 	default:
 		return "", false
 	}
+}
+
+func fmtKeyCords(x, y int) string {
+	if x == -1 {
+		return "0:0"
+	}
+
+	return fmt.Sprintf("%d:%d", x, y)
 }

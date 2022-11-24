@@ -17,8 +17,8 @@ This library is still experimental and probably broken. Use at your own risk.
 - Powerful builtin checks
   - Required fields
   - Regex matching
+  - Enums Sets
   - <s>Field types</s> (coming soon!)
-  - <s>Enums Sets</s> (coming soon!)
   - <s>Field length</s> (coming soon!)
   - <s>Parsable Date</s> (coming soon!)
   - <s>Date Format</s> (coming soon!)
@@ -92,6 +92,23 @@ rules:
       fields:
         - "meta.slug"
         - "slug"
+```
+
+`builtin.enum` - checks to see if the string or string array are defined in the values.
+
+Supported types are `string` and `[]string`
+
+```yaml
+  FM004:
+    level: error
+    description: "category not in list"
+    builtin.enum:
+      values:
+        - "Go"
+        - "Python"
+      fields:
+        - "category"
+        - "post.category"
 ```
 
 #### Content

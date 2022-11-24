@@ -24,11 +24,17 @@ type RuleMatch struct {
 	Fields []string `yaml:"fields"`
 }
 
+type RuleEnum struct {
+	Values []string `yaml:"values"`
+	Fields []string `yaml:"fields"`
+}
+
 type Rule struct {
 	Description string    `yaml:"description"`
 	Level       string    `yaml:"level"`
 	Required    []string  `yaml:"builtin.required"`
 	Match       RuleMatch `yaml:"builtin.match"`
+	Enum        RuleEnum  `yaml:"builtin.enum"`
 }
 
 func (r Rule) Check(id string, fm frontmatter.FrontMatter) error {
@@ -44,6 +50,12 @@ func (r Rule) Check(id string, fm frontmatter.FrontMatter) error {
 
 	if len(r.Match.Re) > 0 {
 		if err := check.Match(fm, r.Match.Re, r.Match.Fields); err != nil {
+			errors = append(errors, err)
+		}
+	}
+
+	if len(r.Enum.Values) > 0 {
+		if err := check.Enum(fm, r.Enum.Values, r.Enum.Fields); err != nil {
 			errors = append(errors, err)
 		}
 	}
