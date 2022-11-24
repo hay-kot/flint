@@ -55,20 +55,20 @@ content:
 
 #### Rules
 
-##### Key
-
 The key is the ID of the rule. This is used to identify the rule in the output. We recommend using either `FM001` and up or define your own rule id using a common prefix and number scheme.
-
-##### Value
 
 The value represents the configuration for the rule set being created. Flint comes with a set of built in rules that can be applied to keys within your front matter. Custom rules cannot be defined at this time. Note that if multiple checks are defined for a rule, they will all be applied to the front matter.
 
-###### Properties
+#### Properties
 
 - `level` - The level of the rule. This can be `error`, `warning`, or `info`. This is used to determine the exit code of the program.
 - `description` - A description of the rule. This is used in the output to describe the rule. Keep it short and sweet.
 
-`bultin.required` - This rule checks to see if the keys defined in the array are present in the front matter. It's values is a list of strings
+#### Built-in Rules
+
+##### `bultin.required`
+
+This rule checks to see if the keys defined in the array are present in the front matter. It's values is a list of strings
 
 ```yaml
 rules:
@@ -80,7 +80,9 @@ rules:
       - "author.email"
 ```
 
-`builtin.match` - This rules checks to see if the regular expressions defined in the array match the values of the fields defined in the array. You can provide mutliple regular expressions and field, just keep in mind that every regex will be applied to each field.
+##### `builtin.match`
+
+This rules checks to see if the regular expressions defined in the array match the values of the fields defined in the array. You can provide multiple regular expressions and field, just keep in mind that every regex will be applied to each field.
 
 ```yaml
   FM003:
@@ -94,7 +96,9 @@ rules:
         - "slug"
 ```
 
-`builtin.enum` - checks to see if the string or string array are defined in the values.
+##### `builtin.enum`
+
+checks to see if the string or string array are defined in the values.
 
 Supported types are `string` and `[]string`
 
