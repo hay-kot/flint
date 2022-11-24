@@ -10,73 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_extractKeys(t *testing.T) {
-	type args struct {
-		in map[string]any
-	}
-	tests := []struct {
-		name string
-		args args
-		want *set.Set[string]
-	}{
-		{
-			name: "empty map",
-			args: args{
-				in: map[string]any{},
-			},
-			want: set.New[string](),
-		},
-		{
-			name: "single key",
-			args: args{
-				in: map[string]any{
-					"foo": "bar",
-				},
-			},
-			want: set.New("foo"),
-		},
-		{
-			name: "nested keys",
-			args: args{
-				in: map[string]any{
-					"foo": map[string]any{
-						"bar": "baz",
-						"qux": "quux",
-						"quuz": map[string]any{
-							"corge": "grault",
-						},
-					},
-					"quuz": "corge",
-				},
-			},
-			want: set.New("foo.bar", "foo.qux", "quuz", "foo.quuz.corge"),
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			want := tt.want.Slice()
-			got := extractKeys(tt.args.in).Slice()
-
-			sort.Strings(want)
-			sort.Strings(got)
-			assert.Equal(t, want, got)
-		})
-	}
-}
-
-var YAMLFrontMatter = `---
-title: "Hello World"
-date: 2012-12-12
-tags:
-  - foo
-categories:
-  - foo
-key:
-  nested: value
----`
-
-func Test_Required(t *testing.T) {
-
+func TestBuiltIns_Required(t *testing.T) {
 	type args struct {
 		fm   frontmatter.FrontMatter
 		keys *set.Set[string]
@@ -121,12 +55,14 @@ func Test_Required(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var err error
 
-			tt.args.fm, err = frontmatter.Read(strings.NewReader(YAMLFrontMatter))
+			tt.args.fm, err = frontmatter.Read(strings.NewReader(yml))
 			if err != nil {
 				t.Fatal(err)
 			}
 
-			err = Required("id", "level", "desc", tt.args.fm, tt.args.keys)
+			checks := New("test", "test", "test")
+
+			err = checks.Required(tt.args.fm, tt.args.keys)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("required() error = %v, wantErr %v", err, tt.wantErr)
 				return

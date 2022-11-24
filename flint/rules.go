@@ -34,14 +34,16 @@ type Rule struct {
 func (r Rule) Check(id string, fm frontmatter.FrontMatter) error {
 	var errors RuleErrors
 
+	check := builtins.New(id, r.Level, r.Description)
+
 	if len(r.Required) > 0 {
-		if err := builtins.Required(id, r.Level, r.Description, fm, set.New(r.Required...)); err != nil {
+		if err := check.Required(fm, set.New(r.Required...)); err != nil {
 			errors = append(errors, err)
 		}
 	}
 
 	if len(r.Match.Re) > 0 {
-		if err := builtins.Match(id, r.Level, r.Description, fm, r.Match.Re, r.Match.Fields); err != nil {
+		if err := check.Match(fm, r.Match.Re, r.Match.Fields); err != nil {
 			errors = append(errors, err)
 		}
 	}

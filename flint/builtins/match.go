@@ -26,7 +26,7 @@ func (m MatchErrors) Error() string {
 	return "match failed"
 }
 
-func Match(id, level, desc string, fm frontmatter.FrontMatter, re, fields []string) error {
+func (b BuiltIns) Match(fm frontmatter.FrontMatter, re, fields []string) error {
 	compiled := make([]*regexp.Regexp, 0, len(re))
 
 	for _, r := range re {
@@ -36,9 +36,9 @@ func Match(id, level, desc string, fm frontmatter.FrontMatter, re, fields []stri
 	data := fm.Data()
 
 	errors := MatchErrors{
-		ID:          id,
-		Level:       level,
-		Description: desc,
+		ID:          b.ID,
+		Level:       b.Level,
+		Description: b.Description,
 	}
 
 	for _, field := range fields {
@@ -75,27 +75,4 @@ func Match(id, level, desc string, fm frontmatter.FrontMatter, re, fields []stri
 	}
 
 	return nil
-}
-
-func extractValue(mp map[string]any, parts []string) (any, bool) {
-	if len(parts) == 1 {
-		v, ok := mp[parts[0]]
-		if !ok {
-			return "", false
-		}
-
-		return v, true
-	}
-
-	v, ok := mp[parts[0]]
-	if !ok {
-		return "", false
-	}
-
-	switch v := v.(type) {
-	case map[string]any:
-		return extractValue(v, parts[1:])
-	default:
-		return "", false
-	}
 }

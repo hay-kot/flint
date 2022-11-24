@@ -13,14 +13,14 @@ func TestNew(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want Set[string]
+		want *Set[string]
 	}{
 		{
 			name: "new",
 			args: args{
 				v: []string{"a", "b", "c"},
 			},
-			want: Set[string]{
+			want: &Set[string]{
 				mp: map[string]struct{}{
 					"a": {},
 					"b": {},
@@ -33,7 +33,7 @@ func TestNew(t *testing.T) {
 			args: args{
 				v: []string{},
 			},
-			want: Set[string]{
+			want: &Set[string]{
 				mp: map[string]struct{}{},
 			},
 		},
@@ -113,13 +113,13 @@ func TestSet_Delete(t *testing.T) {
 	}
 	tests := []struct {
 		name string
-		s    Set[string]
+		s    *Set[string]
 		args args
-		want Set[string]
+		want *Set[string]
 	}{
 		{
 			name: "insert",
-			s: Set[string]{
+			s: &Set[string]{
 				mp: map[string]struct{}{
 					"a": {},
 					"b": {},
@@ -132,7 +132,7 @@ func TestSet_Delete(t *testing.T) {
 			args: args{
 				v: []string{"d", "e", "f"},
 			},
-			want: Set[string]{
+			want: &Set[string]{
 				mp: map[string]struct{}{
 					"a": {},
 					"b": {},
@@ -142,13 +142,13 @@ func TestSet_Delete(t *testing.T) {
 		},
 		{
 			name: "delete empty",
-			s: Set[string]{
+			s: &Set[string]{
 				mp: map[string]struct{}{},
 			},
 			args: args{
 				v: []string{},
 			},
-			want: Set[string]{
+			want: &Set[string]{
 				mp: map[string]struct{}{},
 			},
 		},

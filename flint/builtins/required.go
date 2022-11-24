@@ -19,7 +19,7 @@ func (e ErrorKeysRequired) Error() string {
 // Required is a builtin rule for flint the allows the user/caller to specify a
 // set of Required keys in the frontmatter. These respect dot seperated keys.
 // so you can require nested keys by providing "author.name" as a key.
-func Required(id, level, desc string, fm frontmatter.FrontMatter, keys *set.Set[string]) error {
+func (b BuiltIns) Required(fm frontmatter.FrontMatter, keys *set.Set[string]) error {
 	fmKeys := extractKeys(fm.Data())
 	missing := fmKeys.Missing(keys)
 
@@ -30,30 +30,12 @@ func Required(id, level, desc string, fm frontmatter.FrontMatter, keys *set.Set[
 		}
 
 		return ErrorKeysRequired{
-			ID:          id,
-			Level:       level,
+			ID:          b.ID,
+			Level:       b.Level,
+			Description: b.Description,
 			Fields:      errors,
-			Description: desc,
 		}
 	}
 
 	return nil
-}
-
-func extractKeys(mp map[string]any) *set.Set[string] {
-	keys := set.New[string]()
-	for k := range mp {
-		v := mp[k]
-
-		switch v := v.(type) {
-		case map[string]any:
-			for _, key := range extractKeys(v).Slice() {
-				keys.Insert(k + "." + key)
-			}
-		default:
-			keys.Insert(k)
-		}
-	}
-
-	return keys
 }

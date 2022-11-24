@@ -19,9 +19,18 @@ func main() {
 		Name:  "flint",
 		Usage: "extensible frontmatter linter",
 		Action: func(c *cli.Context) error {
+			var err error
 			start := time.Now()
 
-			cwd, err := os.Getwd()
+			cwd := c.Args().Get(0)
+
+			if cwd == "" {
+				cwd, err = os.Getwd()
+				if err != nil {
+					return err
+				}
+			}
+
 			if err != nil {
 				return fmt.Errorf("failed to get current working directory: %w", err)
 			}
