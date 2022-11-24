@@ -11,6 +11,7 @@ import (
 var (
 	StyleFilePath   = lipgloss.NewStyle().Bold(true).Underline(true)
 	StyleLightGray  = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#52545A"))
+	StyleSuccess    = lipgloss.NewStyle().Foreground(lipgloss.Color("#4CAF50"))
 	StyleLineNumber = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#52545A")).MarginLeft(3)
 	StyleError      = lipgloss.NewStyle().Foreground(lipgloss.Color("#AB3D30"))
 	StyleWarning    = lipgloss.NewStyle().Foreground(lipgloss.Color("#F25D18"))

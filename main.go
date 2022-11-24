@@ -103,6 +103,8 @@ func main() {
 				for _, fp := range sorted {
 					fmt.Println(flint.FmtFileErrors(fp, errors[fp]))
 				}
+			} else {
+				fmt.Println(flint.StyleSuccess.Render("\n✓ No errors found"))
 			}
 
 			fmt.Println(flint.StyleLightGray.Render((fmt.Sprintf("\n✨ flint took %s\n", time.Since(start)))))
