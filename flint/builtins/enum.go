@@ -2,24 +2,28 @@ package builtins
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hay-kot/flint/pkgs/frontmatter"
 	"github.com/hay-kot/flint/pkgs/set"
 )
 
+func (b BuiltIns) EnumFunc(values []string, fields []string) CheckerFunc {
+	return func(fm frontmatter.FrontMatter) error {
+		return b.DateFormat(fm, values, fields)
+	}
+}
+
 func (b BuiltIns) Enum(fm frontmatter.FrontMatter, values []string, fields []string) error {
-	errGroup := ErrGroup{
+	valueErrors := ValueErrors{
 		ID:          b.ID,
 		Level:       b.Level,
 		Description: b.Description,
 	}
 
 	valuesSet := set.New(values...)
-	data := fm.Data()
 
 	for _, field := range fields {
-		v, ok := extractValue(data, strings.Split(field, "."))
+		v, ok := fm.Get(field)
 		if !ok {
 			continue
 		}
@@ -27,7 +31,7 @@ func (b BuiltIns) Enum(fm frontmatter.FrontMatter, values []string, fields []str
 		errAppender := func(v string) {
 			xy := fmtKeyCords(fm.KeyCords(field))
 
-			errGroup.Errors = append(errGroup.Errors, ErrGroupValue{
+			valueErrors.Errors = append(valueErrors.Errors, ValueError{
 				Line:        xy,
 				Description: fmt.Sprintf("%q is not an allowed values", v),
 				Field:       field,
@@ -51,8 +55,8 @@ func (b BuiltIns) Enum(fm frontmatter.FrontMatter, values []string, fields []str
 
 	}
 
-	if len(errGroup.Errors) > 0 {
-		return errGroup
+	if len(valueErrors.Errors) > 0 {
+		return valueErrors
 	}
 
 	return nil

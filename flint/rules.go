@@ -4,8 +4,6 @@ import (
 	"strings"
 
 	"github.com/hay-kot/flint/flint/builtins"
-	"github.com/hay-kot/flint/pkgs/frontmatter"
-	"github.com/hay-kot/flint/pkgs/set"
 )
 
 type RuleErrors []error
@@ -43,38 +41,25 @@ type Rule struct {
 	DateFormat  RuleDateFormat `yaml:"builtin.date"`
 }
 
-func (r Rule) Check(id string, fm frontmatter.FrontMatter) error {
-	var errors RuleErrors
-
+func (r Rule) Funcs(id string) []builtins.CheckerFunc {
 	check := builtins.New(id, r.Level, r.Description)
+	var funcs []builtins.CheckerFunc
 
 	if len(r.Required) > 0 {
-		if err := check.Required(fm, set.New(r.Required...)); err != nil {
-			errors = append(errors, err)
-		}
+		funcs = append(funcs, check.RequiredFunc(r.Required))
 	}
 
-	if len(r.Match.Re) > 0 {
-		if err := check.Match(fm, r.Match.Re, r.Match.Fields); err != nil {
-			errors = append(errors, err)
-		}
+	if len(r.Enum.Fields) > 0 {
+		funcs = append(funcs, check.EnumFunc(r.Enum.Values, r.Enum.Fields))
 	}
 
-	if len(r.Enum.Values) > 0 {
-		if err := check.Enum(fm, r.Enum.Values, r.Enum.Fields); err != nil {
-			errors = append(errors, err)
-		}
+	if len(r.Match.Fields) > 0 {
+		funcs = append(funcs, check.MatchFunc(r.Match.Re, r.Match.Fields))
 	}
 
-	if len(r.DateFormat.Format) > 0 {
-		if err := check.DateFormat(fm, r.DateFormat.Format, r.DateFormat.Fields); err != nil {
-			errors = append(errors, err)
-		}
+	if len(r.DateFormat.Fields) > 0 {
+		funcs = append(funcs, check.DateFormatFunc(r.DateFormat.Format, r.DateFormat.Fields))
 	}
 
-	if len(errors) > 0 {
-		return errors
-	}
-
-	return nil
+	return funcs
 }

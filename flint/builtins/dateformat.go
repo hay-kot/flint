@@ -2,24 +2,26 @@ package builtins
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/hay-kot/flint/pkgs/frontmatter"
 )
 
-func (b BuiltIns) DateFormat(fm frontmatter.FrontMatter, format []string, fields []string) error {
-	errGroup := ErrGroup{
+func (b BuiltIns) DateFormatFunc(formats []string, fields []string) CheckerFunc {
+	return func(fm frontmatter.FrontMatter) error {
+		return b.DateFormat(fm, formats, fields)
+	}
+}
+
+func (b BuiltIns) DateFormat(fm frontmatter.FrontMatter, formats []string, fields []string) error {
+	errGroup := ValueErrors{
 		ID:          b.ID,
 		Level:       b.Level,
 		Description: b.Description,
 	}
 
-	data := fm.Data()
-
-outer:
 	for _, field := range fields {
-		value, ok := extractValue(data, strings.Split(field, "."))
+		value, ok := fm.Get(field)
 		if !ok {
 			continue
 		}
@@ -29,19 +31,25 @@ outer:
 			continue
 		}
 
-		for _, f := range format {
+		match := false
+
+	inner:
+		for _, f := range formats {
 			_, err := time.Parse(f, str)
 
 			if err == nil {
-				break outer
+				match = true
+				break inner
 			}
 		}
 
-		errGroup.Errors = append(errGroup.Errors, ErrGroupValue{
-			Line:        fmtKeyCords(fm.KeyCords(field)),
-			Description: fmt.Sprintf("%q is not allowed format", str),
-			Field:       field,
-		})
+		if !match {
+			errGroup.Errors = append(errGroup.Errors, ValueError{
+				Line:        fmtKeyCords(fm.KeyCords(field)),
+				Description: fmt.Sprintf("%q is not allowed format", str),
+				Field:       field,
+			})
+		}
 	}
 
 	if len(errGroup.Errors) > 0 {

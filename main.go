@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -8,9 +9,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/bmatcuk/doublestar/v4"
 	"github.com/hay-kot/flint/flint"
-	"github.com/hay-kot/flint/pkgs/frontmatter"
 	"github.com/urfave/cli/v2"
 )
 
@@ -50,58 +49,25 @@ func main() {
 				return fmt.Errorf("failed to read flint.yml: %w", err)
 			}
 
-			errors := make(map[string][]error)
+			err = conf.Run(cwd)
 
-			for _, c := range conf.Content {
-				matches := []string{}
-
-				for _, p := range c.Paths {
-					root, p := doublestar.SplitPattern(p)
-					root = filepath.Join(cwd, root)
-					fsys := os.DirFS(root)
-
-					relmatches, err := doublestar.Glob(fsys, p)
-					if err != nil {
-						return fmt.Errorf("failed to glob %s: %w", p, err)
+			if err != nil {
+				switch {
+				case errors.As(err, &flint.FlintErrors{}):
+					errs := err.(flint.FlintErrors)
+					sorted := make([]string, len(errs))
+					i := 0
+					for k := range errs {
+						sorted[i] = k
+						i++
 					}
+					sort.Strings(sorted)
 
-					for _, m := range relmatches {
-						matches = append(matches, filepath.Join(root, m))
+					for _, fp := range sorted {
+						fmt.Println(flint.FmtFileErrors(fp, errs[fp]))
 					}
-				}
-
-				for _, m := range matches {
-					f, err := os.OpenFile(m, os.O_RDONLY, 0)
-					if err != nil {
-						return fmt.Errorf("failed to open %s: %w", m, err)
-					}
-
-					fm, err := frontmatter.Read(f)
-					if err != nil {
-						return fmt.Errorf("failed to read frontmatter from %s: %w", m, err)
-					}
-
-					for _, r := range c.Rules {
-						rule := conf.Rules[r]
-						err := rule.Check(r, fm)
-						if err != nil {
-							errors[m] = append(errors[m], err)
-						}
-					}
-				}
-			}
-
-			if len(errors) > 0 {
-				sorted := make([]string, len(errors))
-				i := 0
-				for k := range errors {
-					sorted[i] = k
-					i++
-				}
-				sort.Strings(sorted)
-
-				for _, fp := range sorted {
-					fmt.Println(flint.FmtFileErrors(fp, errors[fp]))
+				default:
+					return fmt.Errorf("failed to run flint: %w", err)
 				}
 			} else {
 				fmt.Println(flint.StyleSuccess.Render("\n✓ No errors found"))

@@ -2,47 +2,61 @@ package builtins
 
 import (
 	"regexp"
-	"strings"
 
 	"github.com/hay-kot/flint/pkgs/frontmatter"
 )
 
-func (b BuiltIns) Match(fm frontmatter.FrontMatter, re, fields []string) error {
-	compiled := make([]*regexp.Regexp, 0, len(re))
+func (b BuiltIns) MatchFunc(patterns []string, fields []string) CheckerFunc {
+	compiled := make([]*regexp.Regexp, 0, len(patterns))
 
-	for _, r := range re {
+	for _, r := range patterns {
 		compiled = append(compiled, regexp.MustCompile(r))
 	}
 
-	data := fm.Data()
+	return func(fm frontmatter.FrontMatter) error {
+		return b.Match(fm, compiled, fields)
+	}
+}
 
-	errors := ErrGroup{
+func (b BuiltIns) Match(fm frontmatter.FrontMatter, rgx []*regexp.Regexp, fields []string) error {
+	errors := ValueErrors{
 		ID:          b.ID,
 		Level:       b.Level,
 		Description: b.Description,
 	}
 
 	for _, field := range fields {
-		parts := strings.Split(field, ".")
-
-		v, ok := extractValue(data, parts)
+		v, ok := fm.Get(field)
 		if !ok {
 			continue
 		}
 
+		check := func(r *regexp.Regexp, v string) {
+			if r.MatchString(v) {
+				return
+			}
+
+			errors.Errors = append(errors.Errors, ValueError{
+				Line:  fmtKeyCords(fm.KeyCords(field)),
+				Field: field,
+			})
+		}
+
 		switch v := v.(type) {
 		case string:
-			for _, re := range compiled {
-				if !re.MatchString(v) {
-					xy := fmtKeyCords(fm.KeyCords(field))
-
-					errors.Errors = append(errors.Errors, ErrGroupValue{
-						Line:  xy,
-						Field: field,
-					})
+			for _, re := range rgx {
+				check(re, v)
+			}
+		case []any:
+			for _, vv := range v {
+				if s, ok := vv.(string); ok {
+					for _, re := range rgx {
+						check(re, s)
+					}
 				}
 			}
 		}
+
 	}
 
 	if len(errors.Errors) > 0 {

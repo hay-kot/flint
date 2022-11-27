@@ -10,9 +10,9 @@ import (
 
 var (
 	StyleFilePath   = lipgloss.NewStyle().Bold(true).Underline(true)
-	StyleLightGray  = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#52545A"))
+	StyleLightGray  = lipgloss.NewStyle().Foreground(lipgloss.Color("#52545A")).Bold(true)
+	StyleLineNumber = lipgloss.NewStyle().Foreground(lipgloss.Color("#52545A")).Bold(true).MarginLeft(3)
 	StyleSuccess    = lipgloss.NewStyle().Foreground(lipgloss.Color("#4CAF50"))
-	StyleLineNumber = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("#52545A")).MarginLeft(3)
 	StyleError      = lipgloss.NewStyle().Foreground(lipgloss.Color("#AB3D30"))
 	StyleWarning    = lipgloss.NewStyle().Foreground(lipgloss.Color("#F25D18"))
 )
@@ -46,17 +46,17 @@ func FmtFileErrors(path string, e []error) string {
 
 		for _, e := range all {
 			switch err := e.(type) {
-			case builtins.ErrorKeysRequired:
+			case builtins.FieldErrors:
 				for _, key := range err.Fields {
 					cols = append(cols, []string{
-						"0:0",
+						or(key.Line, "0:0"),
 						err.Level,
-						key,
-						err.Description,
+						key.Field,
+						or(key.Description, err.Description),
 						err.ID,
 					})
 				}
-			case builtins.ErrGroup:
+			case builtins.ValueErrors:
 				for _, m := range err.Errors {
 					cols = append(cols, []string{
 						m.Line,

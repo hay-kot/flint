@@ -1,7 +1,6 @@
 package frontmatter
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"io"
@@ -14,77 +13,16 @@ var (
 	ErrNoFrontMatter = errors.New("no front matter found")
 )
 
-var (
-	YAMLSeparator = []byte("---")
-	NewLine       = []byte("\n")
-)
+type result struct {
+	value any
+	ok    bool
+}
 
 type FrontMatter struct {
 	content []byte
-	data    map[string]interface{}
-}
-
-// KeyCords returns the line and starting column of the given key.
-func (fm *FrontMatter) KeyCords(key string) (x int, y int) {
-	parts := strings.Split(key, ".")
-	const offset = 2 // 2 line offset for 0 index and --- separator
-
-	return KeyCordsFinder(bytes.Split(fm.content, NewLine), parts, offset)
-}
-
-func KeyCordsFinder(lines [][]byte, keyPath []string, offset int) (x int, y int) {
-	line, col, take := -1, 0, 0
-
-	for i, l := range lines {
-		key := keyPath[0]
-		if bytes.Contains(l, []byte(key+":")) {
-			line = (i + offset)
-			offset += i
-			take = i
-			for j, c := range l {
-				if c != ' ' {
-					col = j + 1
-
-					break
-				}
-			}
-			break
-		}
-	}
-
-	if line == -1 {
-		return -1, -1
-	}
-
-	if len(keyPath) == 1 {
-		return line, col
-	}
-
-	return KeyCordsFinder(lines[take:], keyPath[1:], offset)
-}
-
-func (fm *FrontMatter) LineOfKey(key string) int {
-	for i, line := range bytes.Split(fm.content, NewLine) {
-		if bytes.HasPrefix(line, []byte(key+":")) {
-			return i + 1
-		}
-	}
-
-	return -1
-}
-
-func (fm *FrontMatter) Content() []byte {
-	c := make([]byte, len(fm.content))
-	copy(c, fm.content)
-	return c
-}
-
-func (fm *FrontMatter) Data() map[string]interface{} {
-	d := make(map[string]interface{}, len(fm.data))
-	for k, v := range fm.data {
-		d[k] = v
-	}
-	return d
+	data    map[string]any
+	keys    []string
+	values  map[string]result
 }
 
 func Read(r io.Reader) (FrontMatter, error) {
@@ -99,17 +37,17 @@ func Read(r io.Reader) (FrontMatter, error) {
 	}, nil
 }
 
-func read(r io.Reader) (data map[string]interface{}, content []byte, err error) {
+func read(r io.Reader) (data map[string]any, content []byte, err error) {
 	content, err = extractFrontMatter(r)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	if content == nil {
-		return nil, nil, ErrNoFrontMatter // TODO
+		return nil, nil, ErrNoFrontMatter
 	}
 
-	data = make(map[string]interface{})
+	data = make(map[string]any)
 	err = yaml.Unmarshal(content, data)
 	if err != nil {
 		return nil, nil, err
@@ -118,32 +56,110 @@ func read(r io.Reader) (data map[string]interface{}, content []byte, err error) 
 	return data, content, nil
 }
 
-func extractFrontMatter(r io.Reader) ([]byte, error) {
-	bits := make([]byte, 0)
+// KeyCords returns the line and starting column of the given key.
+func (fm *FrontMatter) KeyCords(key string) (x int, y int) {
+	parts := strings.Split(key, ".")
+	const offset = 2 // 2 line offset for 0 index and --- separator
 
-	first := false
-	success := false
+	return keyCordsFinder(bytes.Split(fm.content, NewLine), parts, offset)
+}
 
-	scanner := bufio.NewScanner(r)
-	for scanner.Scan() {
-		line := scanner.Bytes()
+// Content returns a copy of the byte slice containing the content of the
+// front matter.
+func (fm *FrontMatter) Content() []byte {
+	c := make([]byte, len(fm.content))
+	copy(c, fm.content)
+	return c
+}
 
-		if !first && bytes.Equal(line, YAMLSeparator) {
-			first = true
-			continue
-		}
+// Data returns a copy of the front matter data.
+func (fm *FrontMatter) Data() map[string]any {
+	d := make(map[string]any, len(fm.data))
+	for k, v := range fm.data {
+		d[k] = v
+	}
+	return d
+}
 
-		if first && bytes.Equal(line, YAMLSeparator) {
-			success = true
-			break
-		}
+// Get returns the value of the given key. If the key is not found, the
+// default value is returned and ok is false.
+func (fm *FrontMatter) Get(key string) (any, bool) {
+	parts := strings.Split(key, ".")
 
-		bits = append(bits, append(line, NewLine...)...)
+	if fm.values == nil {
+		fm.values = make(map[string]result)
 	}
 
-	if !success {
-		return nil, nil
+	v, ok := fm.values[key]
+
+	if !ok {
+		var val any
+		val, ok = get(fm.data, parts)
+		v = result{
+			value: val,
+			ok:    ok,
+		}
+		fm.values[key] = v
 	}
 
-	return bits, nil
+	return v.value, v.ok
+}
+
+func get(data map[string]any, parts []string) (any, bool) {
+	if len(parts) == 1 {
+		v, ok := data[parts[0]]
+		if !ok {
+			return "", false
+		}
+
+		return v, true
+	}
+
+	v, ok := data[parts[0]]
+	if !ok {
+		return "", false
+	}
+
+	switch v := v.(type) {
+	case map[string]any:
+		return get(v, parts[1:])
+	default:
+		return "", false
+	}
+}
+
+// Has returns true if the given key exists in the front matter.
+func (fm *FrontMatter) Has(key string) bool {
+	_, ok := fm.Get(key)
+	return ok
+}
+
+// Keys returns a slice of all keys in the front matter.
+func (fm *FrontMatter) Keys() []string {
+	if fm.keys == nil {
+		fm.keys = keys(fm.data)
+	}
+
+	cp := make([]string, len(fm.keys))
+	copy(cp, fm.keys)
+	return cp
+}
+
+func keys(data map[string]any) []string {
+	keyset := make([]string, 0, len(data))
+
+	for k := range data {
+		v := data[k]
+
+		switch v := v.(type) {
+		case map[string]any:
+			for _, key := range keys(v) {
+				keyset = append(keyset, k+"."+key)
+			}
+		default:
+			keyset = append(keyset, k)
+		}
+	}
+
+	return keyset
 }

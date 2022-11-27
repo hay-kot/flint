@@ -45,16 +45,23 @@ func TestBuiltIns_Match(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			b := New("test", "test", "test")
 			fm, _ := frontmatter.Read(strings.NewReader(yml))
 
-			checks := New("test", "error", "test")
+			check := b.MatchFunc(tt.args.re, tt.args.fields)
+			err := check(fm)
 
-			err := checks.Match(fm, tt.args.re, tt.args.fields)
+			switch {
+			case tt.wantErr:
+				if err == nil {
+					t.Errorf("BuiltIns.MatchFunc() error = %v, wantErr %v", err, tt.wantErr)
+					return
+				}
 
-			if tt.wantErr {
-				assert.ErrorAs(t, err, &ErrGroup{})
-			} else {
-				assert.NoError(t, err)
+				assert.ErrorAs(t, err, &ValueErrors{})
+			case (err != nil) != tt.wantErr:
+				t.Errorf("BuiltIns.MatchFunc() error = %v, wantErr %v", err, tt.wantErr)
+				return
 			}
 		})
 	}
