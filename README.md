@@ -169,4 +169,53 @@ content:
 
 ### Recipes
 
-TODO
+#### Blog Requirements
+
+```yaml
+rules:
+  FM001:
+    level: error
+    description: "blog post requirements"
+    builtin.required:
+      - "title"
+      - "slug"
+      - "description"
+      - "date"
+      - "keywords"
+    builtin.date:
+      format:
+        - "2006-01-02"
+      fields:
+        - "date"
+    builtin.length:
+      min: 2
+      max: 5
+      fields:
+        - "keywords"
+        - "categories"
+        - "tags"
+    builtin.match:
+      re:
+        - "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+      fields:
+        - "slug"
+```
+
+#### Ignore Files that start with an underscore
+
+```yaml
+content:
+  - name: Blog Posts
+    paths:
+      - content/blog/**/[!_]*.md
+    rules:
+      - FM001
+      - FM002
+      - FM003
+```
+
+#### Regular Expressions
+
+| Description | Regex                      |
+| ----------- | -------------------------- |
+| Slug        | ^[a-z0-9]+(?:-[a-z0-9]+)*$ |
