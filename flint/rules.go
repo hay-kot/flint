@@ -32,6 +32,12 @@ type RuleEnum struct {
 	Fields []string `yaml:"fields"`
 }
 
+type RuleLength struct {
+	Min    int      `yaml:"min"`
+	Max    int      `yaml:"max"`
+	Fields []string `yaml:"fields"`
+}
+
 type Rule struct {
 	Description string         `yaml:"description"`
 	Level       string         `yaml:"level"`
@@ -39,6 +45,7 @@ type Rule struct {
 	Match       RuleMatch      `yaml:"builtin.match"`
 	Enum        RuleEnum       `yaml:"builtin.enum"`
 	DateFormat  RuleDateFormat `yaml:"builtin.date"`
+	Length      RuleLength     `yaml:"builtin.length"`
 }
 
 func (r Rule) Funcs(id string) []builtins.CheckerFunc {
@@ -59,6 +66,10 @@ func (r Rule) Funcs(id string) []builtins.CheckerFunc {
 
 	if len(r.DateFormat.Fields) > 0 {
 		funcs = append(funcs, check.DateFormatFunc(r.DateFormat.Format, r.DateFormat.Fields))
+	}
+
+	if len(r.Length.Fields) > 0 {
+		funcs = append(funcs, check.LengthFunc(r.Length.Min, r.Length.Max, r.Length.Fields))
 	}
 
 	return funcs

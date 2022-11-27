@@ -19,8 +19,8 @@ This library is still experimental and probably broken. Use at your own risk.
   - Regex matching
   - Enums Sets
   - Date Format
+  - Field Length
   - <s>Field types</s> (coming soon!)
-  - <s>Field length</s> (coming soon!)
   - <s>Asset Existence</s> (coming soon!)
 
 ## Installation
@@ -83,6 +83,8 @@ rules:
 
 This rules checks to see if the regular expressions defined in the array match the values of the fields defined in the array. You can provide multiple regular expressions and field, just keep in mind that every regex will be applied to each field.
 
+Supported types are `string` and `[]string`
+
 ```yaml
   FM003:
     level: error
@@ -118,6 +120,8 @@ Supported types are `string` and `[]string`
 
 checks to see if the date is in the correct format. The format is defined using the [Go time package](https://golang.org/pkg/time/#pkg-constants)
 
+Supported types are `string`
+
 ```yaml
   FM005:
     level: error
@@ -127,6 +131,25 @@ checks to see if the date is in the correct format. The format is defined using 
         - "2006-01-02"
       fields:
         - "date"
+```
+
+##### `builtin.length`
+
+Checks to see if the field meets a min/max length
+
+Supported types are `string` and `[]string`
+
+```yaml
+  FM006:
+    level: error
+    description: "must be between 2 and 5"
+    builtin.length:
+      min: 2
+      max: 5
+      fields:
+        - "keywords"
+        - "categories"
+        - "tags"
 ```
 
 #### Content
