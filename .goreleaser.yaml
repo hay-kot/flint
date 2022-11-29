@@ -32,7 +32,7 @@ changelog:
 brews:
   - tap:
       owner: hay-kot
-      name: flint-tap
+      name: homebrew-flint-tap
     description: "Flint is a frontmatter linter written in Go"
     license: MIT
     dependencies:

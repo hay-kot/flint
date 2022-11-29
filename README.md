@@ -25,7 +25,18 @@ This library is still experimental.
 
 ## Installation
 
-// TODO
+### Go Install
+
+```bash
+go install github.com/hay-kot/flint@latest
+```
+
+### Homebrew
+
+```bash
+brew tap hay-kot/flint-tap
+brew install hay-kot/flint-tap/flint
+```
 
 ## Usage
 
