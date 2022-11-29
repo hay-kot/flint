@@ -36,7 +36,7 @@ func ReadConfig(r io.Reader, format ConfigFormat) (*Config, error) {
 			return nil, err
 		}
 	case TOML:
-		if _, err := toml.DecodeReader(r, &c); err != nil {
+		if _, err := toml.NewDecoder(r).Decode(&c); err != nil {
 			return nil, err
 		}
 	case YAML:
