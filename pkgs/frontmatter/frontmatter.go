@@ -25,13 +25,13 @@ type FrontMatter struct {
 	values  map[string]result
 }
 
-func Read(r io.Reader) (FrontMatter, error) {
+func Read(r io.Reader) (*FrontMatter, error) {
 	data, content, err := read(r)
 	if err != nil {
-		return FrontMatter{}, err
+		return nil, err
 	}
 
-	return FrontMatter{
+	return &FrontMatter{
 		data:    data,
 		content: content,
 	}, nil
@@ -109,7 +109,7 @@ func get(data map[string]any, parts []string) (any, bool) {
 	if len(parts) == 1 {
 		v, ok := data[parts[0]]
 		if !ok {
-			return "", false
+			return nil, false
 		}
 
 		return v, true
@@ -117,14 +117,14 @@ func get(data map[string]any, parts []string) (any, bool) {
 
 	v, ok := data[parts[0]]
 	if !ok {
-		return "", false
+		return nil, false
 	}
 
 	switch v := v.(type) {
 	case map[string]any:
 		return get(v, parts[1:])
 	default:
-		return "", false
+		return nil, false
 	}
 }
 
