@@ -16,8 +16,10 @@ func (fe FlintErrors) Error() string {
 	return "flint errors"
 }
 
-func (conf *Config) Run(cwd string) error {
+func (conf *Config) Run(cwd string) (int, error) {
 	errs := make(FlintErrors)
+
+	total := 0
 
 	for _, c := range conf.Content {
 		var matches []string
@@ -28,8 +30,9 @@ func (conf *Config) Run(cwd string) error {
 			fsys := os.DirFS(root)
 
 			relmatches, err := doublestar.Glob(fsys, p)
+			total += len(relmatches)
 			if err != nil {
-				return fmt.Errorf("failed to glob %s: %w", p, err)
+				return 0, fmt.Errorf("failed to glob %s: %w", p, err)
 			}
 
 			matches = make([]string, 0, len(relmatches))
@@ -48,14 +51,14 @@ func (conf *Config) Run(cwd string) error {
 		for _, m := range matches {
 			f, err := os.OpenFile(m, os.O_RDONLY, 0x0)
 			if err != nil {
-				return fmt.Errorf("failed to open %s: %w", m, err)
+				return 0, fmt.Errorf("failed to open %s: %w", m, err)
 			}
 
 			fm, err := frontmatter.Read(f)
 			f.Close()
 
 			if err != nil {
-				return fmt.Errorf("failed to read frontmatter from %s: %w", m, err)
+				return 0, fmt.Errorf("failed to read frontmatter from %s: %w", m, err)
 			}
 
 			for _, check := range allChecks {
@@ -69,8 +72,8 @@ func (conf *Config) Run(cwd string) error {
 	}
 
 	if len(errs) > 0 {
-		return errs
+		return total, errs
 	}
 
-	return nil
+	return total, nil
 }
