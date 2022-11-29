@@ -19,7 +19,7 @@ func (b BuiltIns) EnumFunc(values []string, fields []string) Checker {
 				continue
 			}
 
-			errAppender := func(v string) {
+			addErr := func(v string) {
 				xy := fmtKeyCords(fm.KeyCords(field))
 
 				valueErrors.Errors = append(valueErrors.Errors, ValueError{
@@ -32,13 +32,13 @@ func (b BuiltIns) EnumFunc(values []string, fields []string) Checker {
 			switch v := v.(type) {
 			case string:
 				if !valuesSet.Contains(v) {
-					errAppender(v)
+					addErr(v)
 				}
 			case []any:
 				for _, vv := range v {
 					if s, ok := vv.(string); ok {
 						if !valuesSet.Contains(s) {
-							errAppender(s)
+							addErr(s)
 						}
 					}
 				}
