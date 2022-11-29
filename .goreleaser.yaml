@@ -29,3 +29,15 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+brews:
+  - tap:
+      owner: hay-kot
+      name: flint-tap
+    description: "Flint is a frontmatter linter written in Go"
+    license: MIT
+    dependencies:
+      - name: go
+        type: optional
+      - name: git
+    test: |
+      system "#{bin}/flint -version"
