@@ -21,7 +21,7 @@ var example []byte
 
 var (
 	version = "0.1.0"
-	build   = "dev"
+	commit  = "dev"
 	date    = "unknown"
 
 	pattern = "flint.{yml,yaml,toml,json}"
@@ -68,7 +68,7 @@ func pathResolver(cwd string, path string) (string, error) {
 func main() {
 	app := &cli.App{
 		Name:    "flint",
-		Version: fmt.Sprintf("%s (%s), built at %s", version, build, date),
+		Version: fmt.Sprintf("%s (%s), built at %s", version, commit[:8], date),
 		Usage:   "extensible frontmatter linter",
 		Flags: []cli.Flag{
 			&cli.PathFlag{
