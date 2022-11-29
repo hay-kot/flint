@@ -21,3 +21,5 @@
 go.work
 content/*
 flint.yml
+flint.json
+flint.toml

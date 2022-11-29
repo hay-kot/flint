@@ -40,7 +40,7 @@ rules:
   FM001:
     level: error
     description: "required post fields are missing"
-    builtin.required:
+    required:
       - "title"
       - "date"
 
@@ -74,12 +74,12 @@ rules:
   FM002:
     level: warning
     description: "author is missing"
-    builtin.required:
+    required:
       - "author.name"
       - "author.email"
 ```
 
-##### `builtin.match`
+##### `match`
 
 This rules checks to see if the regular expressions defined in the array match the values of the fields defined in the array. You can provide multiple regular expressions and field, just keep in mind that every regex will be applied to each field.
 
@@ -89,7 +89,7 @@ Supported types are `string` and `[]string`
   FM003:
     level: error
     description: "slug is not valid url"
-    builtin.match:
+    match:
       re:
         - "^[a-z0-9]+(?:-[a-z0-9]+)*$"
       fields:
@@ -97,7 +97,7 @@ Supported types are `string` and `[]string`
         - "slug"
 ```
 
-##### `builtin.enum`
+##### `enum`
 
 checks to see if the string or string array are defined in the values.
 
@@ -107,7 +107,7 @@ Supported types are `string` and `[]string`
   FM004:
     level: error
     description: "category not in list"
-    builtin.enum:
+    enum:
       values:
         - "Go"
         - "Python"
@@ -116,7 +116,7 @@ Supported types are `string` and `[]string`
         - "post.category"
 ```
 
-##### `builtin.date`
+##### `date`
 
 checks to see if the date is in the correct format. The format is defined using the [Go time package](https://golang.org/pkg/time/#pkg-constants)
 
@@ -126,14 +126,14 @@ Supported types are `string`
   FM005:
     level: error
     description: "date is not in correct format"
-    builtin.date:
+    date:
       format:
         - "2006-01-02"
       fields:
         - "date"
 ```
 
-##### `builtin.length`
+##### `length`
 
 Checks to see if the field meets a min/max length
 
@@ -143,7 +143,7 @@ Supported types are `string` and `[]string`
   FM006:
     level: error
     description: "must be between 2 and 5"
-    builtin.length:
+    length:
       min: 2
       max: 5
       fields:
@@ -176,25 +176,25 @@ rules:
   FM001:
     level: error
     description: "blog post requirements"
-    builtin.required:
+    required:
       - "title"
       - "slug"
       - "description"
       - "date"
       - "keywords"
-    builtin.date:
+    date:
       format:
         - "2006-01-02"
       fields:
         - "date"
-    builtin.length:
+    length:
       min: 2
       max: 5
       fields:
         - "keywords"
         - "categories"
         - "tags"
-    builtin.match:
+    match:
       re:
         - "^[a-z0-9]+(?:-[a-z0-9]+)*$"
       fields:

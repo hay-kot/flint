@@ -18,34 +18,34 @@ func (re RuleErrors) Error() string {
 }
 
 type RuleMatch struct {
-	Re     []string `yaml:"re"`
-	Fields []string `yaml:"fields"`
+	Re     []string `yaml:"re" json:"re" toml:"re"`
+	Fields []string `yaml:"fields" json:"fields" toml:"fields"`
 }
 
 type RuleDateFormat struct {
-	Fields []string `yaml:"fields"`
-	Format []string `yaml:"format"`
+	Fields []string `yaml:"fields" json:"fields" toml:"fields"`
+	Format []string `yaml:"format" json:"format" toml:"format"`
 }
 
 type RuleEnum struct {
-	Values []string `yaml:"values"`
-	Fields []string `yaml:"fields"`
+	Values []string `yaml:"values" json:"values" toml:"values"`
+	Fields []string `yaml:"fields" json:"fields" toml:"fields"`
 }
 
 type RuleLength struct {
-	Min    int      `yaml:"min"`
-	Max    int      `yaml:"max"`
-	Fields []string `yaml:"fields"`
+	Min    int      `yaml:"min" json:"min" toml:"min"`
+	Max    int      `yaml:"max" json:"max" toml:"max"`
+	Fields []string `yaml:"fields" json:"fields" toml:"fields"`
 }
 
 type Rule struct {
-	Description string         `yaml:"description"`
-	Level       string         `yaml:"level"`
-	Required    []string       `yaml:"builtin.required"`
-	Match       RuleMatch      `yaml:"builtin.match"`
-	Enum        RuleEnum       `yaml:"builtin.enum"`
-	DateFormat  RuleDateFormat `yaml:"builtin.date"`
-	Length      RuleLength     `yaml:"builtin.length"`
+	Description string         `yaml:"description" json:"description" toml:"description"`
+	Level       string         `yaml:"level" json:"level" toml:"level"`
+	Required    []string       `yaml:"required" json:"required" toml:"required"`
+	Match       RuleMatch      `yaml:"match" json:"match" toml:"match"`
+	Enum        RuleEnum       `yaml:"enum" json:"enum" toml:"enum"`
+	DateFormat  RuleDateFormat `yaml:"date" json:"date" toml:"date"`
+	Length      RuleLength     `yaml:"length" json:"length" toml:"length"`
 }
 
 func (r Rule) Funcs(id string) []builtins.Checker {

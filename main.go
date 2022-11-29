@@ -11,6 +11,7 @@ import (
 
 	_ "embed"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/hay-kot/flint/flint"
 	"github.com/urfave/cli/v2"
 )
@@ -22,14 +23,39 @@ var (
 	version = "0.1.0"
 	build   = "dev"
 	date    = "unknown"
+
+	pattern = "flint.{yml,yaml,toml,json}"
 )
 
-func pathResolver(cwd string, path string) string {
-	if filepath.IsAbs(path) {
-		return path
+func confResolver(absPath string) (path string, err error) {
+	fsys := os.DirFS(filepath.Dir(absPath))
+	r, err := doublestar.Glob(fsys, pattern)
+	if err != nil {
+		return "", err
 	}
 
-	return filepath.Join(cwd, path)
+	if len(r) == 0 {
+		return "", fmt.Errorf("no config file found")
+	}
+
+	return r[0], nil
+}
+
+func pathResolver(cwd string, path string) (string, error) {
+	if !filepath.IsAbs(path) {
+		path = filepath.Join(cwd, path)
+	}
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		match, err := confResolver(path)
+		if err != nil {
+			return "", err
+		}
+
+		return match, nil
+	}
+
+	return path, nil
 }
 
 func main() {
@@ -52,29 +78,41 @@ func main() {
 			cwd := c.Args().Get(0)
 
 			if cwd == "" {
-				cwd, err = os.Getwd()
-				if err != nil {
-					return err
-				}
+				return errors.New("no path provided")
 			}
 
 			if err != nil {
 				return fmt.Errorf("failed to get current working directory: %w", err)
 			}
 
-			confpath := pathResolver(cwd, c.String("config"))
-			if _, err := os.Stat(confpath); os.IsNotExist(err) {
-				return fmt.Errorf("failed to find flint.yml at %q: %w", confpath, err)
+			confpath, err := pathResolver(cwd, c.String("config"))
+			if err != nil {
+				return fmt.Errorf("failed to resolve config file: %w", err)
 			}
 
 			conffile, err := os.OpenFile(confpath, os.O_RDONLY, 0)
 			if err != nil {
-				return fmt.Errorf("failed to open flint.yml: %w", err)
+				return fmt.Errorf("failed to find config file: %w", err)
 			}
 
-			conf, err := flint.ReadConfig(conffile)
+			ext := filepath.Ext(confpath)
+
+			var format flint.ConfigFormat
+			switch ext {
+			case ".json":
+				format = flint.JSON
+			case ".toml":
+				format = flint.TOML
+			case ".yml", ".yaml":
+				format = flint.YAML
+			default:
+				return fmt.Errorf("unsupported config file format: %s", ext)
+			}
+
+			conf, err := flint.ReadConfig(conffile, format)
+			conffile.Close()
 			if err != nil {
-				return fmt.Errorf("failed to read flint.yml: %w", err)
+				return fmt.Errorf("failed to find config file: %w", err)
 			}
 
 			err = conf.Run(cwd)
