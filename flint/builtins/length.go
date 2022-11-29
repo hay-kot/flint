@@ -6,13 +6,9 @@ import (
 	"github.com/hay-kot/flint/pkgs/frontmatter"
 )
 
-func (b *BuiltIns) LengthFunc(min, max int, fields []string) CheckerFunc {
+func (b *BuiltIns) LengthFunc(min, max int, fields []string) Checker {
 	return func(fm *frontmatter.FrontMatter) error {
-		valueErrors := ValueErrors{
-			ID:          b.ID,
-			Level:       b.Level,
-			Description: b.Description,
-		}
+		valueErrors := newValueErrors(b.ID, b.Level, b.Description)
 
 		for _, field := range fields {
 			v, ok := fm.Get(field)

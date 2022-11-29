@@ -39,7 +39,7 @@ func (conf *Config) Run(cwd string) error {
 			}
 		}
 
-		allChecks := make([]builtins.CheckerFunc, 0, len(c.Rules))
+		allChecks := make([]builtins.Checker, 0, len(c.Rules))
 
 		for _, r := range c.Rules {
 			allChecks = append(allChecks, conf.Rules[r].Funcs(r)...)

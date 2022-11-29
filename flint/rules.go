@@ -48,9 +48,9 @@ type Rule struct {
 	Length      RuleLength     `yaml:"builtin.length"`
 }
 
-func (r Rule) Funcs(id string) []builtins.CheckerFunc {
+func (r Rule) Funcs(id string) []builtins.Checker {
 	check := builtins.New(id, r.Level, r.Description)
-	var funcs []builtins.CheckerFunc
+	var funcs []builtins.Checker
 
 	if len(r.Required) > 0 {
 		funcs = append(funcs, check.RequiredFunc(r.Required))

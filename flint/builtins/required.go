@@ -8,7 +8,7 @@ import (
 // RequiredFunc is a builtin rule for flint the allows the user/caller to specify a
 // set of Required keys in the frontmatter. These respect dot seperated keys.
 // so you can require nested keys by providing "author.name" as a key.
-func (b BuiltIns) RequiredFunc(required []string) CheckerFunc {
+func (b BuiltIns) RequiredFunc(required []string) Checker {
 	requiredSet := set.New(required...)
 
 	return func(fm *frontmatter.FrontMatter) error {
@@ -16,9 +16,9 @@ func (b BuiltIns) RequiredFunc(required []string) CheckerFunc {
 		missing := fmKeys.Missing(requiredSet)
 
 		if missing.Len() > 0 {
-			errs := make([]ValueError, 0, missing.Len())
+			errs := make([]FieldError, 0, missing.Len())
 			for _, key := range missing.Slice() {
-				errs = append(errs, ValueError{
+				errs = append(errs, FieldError{
 					Line:  fmtKeyCords(fm.KeyCords(key)),
 					Field: key,
 				})

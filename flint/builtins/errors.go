@@ -13,6 +13,14 @@ type ValueErrors struct {
 	Errors      []ValueError
 }
 
+func newValueErrors(id, level, description string) ValueErrors {
+	return ValueErrors{
+		ID:          id,
+		Level:       level,
+		Description: description,
+	}
+}
+
 func (m ValueErrors) Error() string {
 	return "match failed"
 }
