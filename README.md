@@ -1,6 +1,6 @@
 <br />
 <div align="center">
-  <h3 align="center">Flint</h3>
+  <h1 align="center">Flint</h1>
   <p align="center">
     Customizable FrontMatter linter for your static site generator
     <br />
