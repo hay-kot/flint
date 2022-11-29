@@ -26,10 +26,39 @@ func or[T comparable](a, b T) T {
 	return b
 }
 
-func FmtFileErrors(path string, e []error) string {
+type prettyOptions struct {
+	color bool
+}
+
+type prettyOptionFunc func(*prettyOptions)
+
+func WithColor(v bool) prettyOptionFunc {
+	return func(o *prettyOptions) {
+		o.color = v
+	}
+}
+
+// FmtFileErrors takes in a map of filepaths to errors and returns a string
+// of the the formatted errors output.
+//
+// Supported Error Types
+//   - builtins.FieldErrors
+//   - builtins.ValueErrors
+//   - RuleErrors (unwrapped into individual errors)
+func FmtFileErrors(path string, e []error, optfn ...prettyOptionFunc) string {
+	if len(e) == 0 {
+		return ""
+	}
+
+	opts := prettyOptions{
+		color: true,
+	}
+
+	for _, opt := range optfn {
+		opt(&opts)
+	}
+
 	bldr := strings.Builder{}
-	bldr.WriteString(StyleFilePath.Render(path))
-	bldr.WriteString("\n")
 
 	cols := [][]string{}
 
@@ -70,14 +99,20 @@ func FmtFileErrors(path string, e []error) string {
 		}
 	}
 
-	bldr.WriteString(fileErrTable(cols))
+	if opts.color {
+		bldr.WriteString(StyleFilePath.Render(path))
+	} else {
+		bldr.WriteString(path)
+	}
+	bldr.WriteString("\n")
+	bldr.WriteString(fileErrTable(cols, opts.color))
 	return bldr.String()
 }
 
 // fileErrTable takes in a 2D array of strings and returns a string of a table.
 // including the header. It returns an evenly spaced table for neatly printing
 // tables with a consistent and simple look.
-func fileErrTable(rows [][]string) string {
+func fileErrTable(rows [][]string, color bool) string {
 	table := strings.Builder{}
 	cols := len(rows[0])
 
@@ -92,24 +127,30 @@ func fileErrTable(rows [][]string) string {
 	}
 
 	for _, row := range rows {
+		last := len(row) - 1
 		for j, s := range row {
 			spaces := strings.Repeat(" ", max[j]-len(s)+4)
 
-			switch j {
-			case 1:
-				if strings.Contains(s, "error") {
-					s = StyleError.Render(s)
-				} else if strings.Contains(s, "warning") {
-					s = StyleWarning.Render(s)
+			if color {
+				switch j {
+				case 1:
+					if strings.Contains(s, "error") {
+						s = StyleError.Render(s)
+					} else if strings.Contains(s, "warning") {
+						s = StyleWarning.Render(s)
+					}
+				case 2:
+					break
+				default:
+					s = StyleLineNumber.Render(s)
 				}
-			case 2:
-				break
-			default:
-				s = StyleLineNumber.Render(s)
 			}
 
 			table.WriteString(s)
-			table.WriteString(spaces)
+
+			if j != last {
+				table.WriteString(spaces)
+			}
 		}
 		table.WriteString("\n")
 	}
