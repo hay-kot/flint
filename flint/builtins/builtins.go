@@ -2,7 +2,7 @@ package builtins
 
 import "github.com/hay-kot/flint/pkgs/frontmatter"
 
-type CheckerFunc func(fm frontmatter.FrontMatter) error
+type CheckerFunc func(fm *frontmatter.FrontMatter) error
 
 type BuiltIns struct {
 	ID          string

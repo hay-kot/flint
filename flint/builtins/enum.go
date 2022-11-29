@@ -8,12 +8,12 @@ import (
 )
 
 func (b BuiltIns) EnumFunc(values []string, fields []string) CheckerFunc {
-	return func(fm frontmatter.FrontMatter) error {
+	return func(fm *frontmatter.FrontMatter) error {
 		return b.DateFormat(fm, values, fields)
 	}
 }
 
-func (b BuiltIns) Enum(fm frontmatter.FrontMatter, values []string, fields []string) error {
+func (b BuiltIns) Enum(fm *frontmatter.FrontMatter, values []string, fields []string) error {
 	valueErrors := ValueErrors{
 		ID:          b.ID,
 		Level:       b.Level,

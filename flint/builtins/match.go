@@ -13,12 +13,12 @@ func (b BuiltIns) MatchFunc(patterns []string, fields []string) CheckerFunc {
 		compiled = append(compiled, regexp.MustCompile(r))
 	}
 
-	return func(fm frontmatter.FrontMatter) error {
+	return func(fm *frontmatter.FrontMatter) error {
 		return b.Match(fm, compiled, fields)
 	}
 }
 
-func (b BuiltIns) Match(fm frontmatter.FrontMatter, rgx []*regexp.Regexp, fields []string) error {
+func (b BuiltIns) Match(fm *frontmatter.FrontMatter, rgx []*regexp.Regexp, fields []string) error {
 	errors := ValueErrors{
 		ID:          b.ID,
 		Level:       b.Level,

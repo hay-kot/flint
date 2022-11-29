@@ -11,7 +11,7 @@ import (
 func (b BuiltIns) RequiredFunc(required []string) CheckerFunc {
 	requiredSet := set.New(required...)
 
-	return func(fm frontmatter.FrontMatter) error {
+	return func(fm *frontmatter.FrontMatter) error {
 		fmKeys := set.New(fm.Keys()...)
 		missing := fmKeys.Missing(requiredSet)
 

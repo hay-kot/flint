@@ -7,7 +7,7 @@ import (
 )
 
 func (b *BuiltIns) LengthFunc(min, max int, fields []string) CheckerFunc {
-	return func(fm frontmatter.FrontMatter) error {
+	return func(fm *frontmatter.FrontMatter) error {
 		valueErrors := ValueErrors{
 			ID:          b.ID,
 			Level:       b.Level,

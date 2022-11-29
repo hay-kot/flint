@@ -8,12 +8,12 @@ import (
 )
 
 func (b BuiltIns) DateFormatFunc(formats []string, fields []string) CheckerFunc {
-	return func(fm frontmatter.FrontMatter) error {
+	return func(fm *frontmatter.FrontMatter) error {
 		return b.DateFormat(fm, formats, fields)
 	}
 }
 
-func (b BuiltIns) DateFormat(fm frontmatter.FrontMatter, formats []string, fields []string) error {
+func (b BuiltIns) DateFormat(fm *frontmatter.FrontMatter, formats []string, fields []string) error {
 	errGroup := ValueErrors{
 		ID:          b.ID,
 		Level:       b.Level,
