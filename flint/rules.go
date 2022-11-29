@@ -6,6 +6,14 @@ import (
 	"github.com/hay-kot/flint/flint/builtins"
 )
 
+type RuleLevel string
+
+const (
+	LevelInfo    RuleLevel = "info"
+	LevelError   RuleLevel = "error"
+	LevelWarning RuleLevel = "warning"
+)
+
 type RuleErrors []error
 
 func (re RuleErrors) Error() string {
@@ -40,7 +48,7 @@ type RuleLength struct {
 
 type Rule struct {
 	Description string         `yaml:"description" json:"description" toml:"description"`
-	Level       string         `yaml:"level" json:"level" toml:"level"`
+	Level       RuleLevel      `yaml:"level" json:"level" toml:"level"`
 	Required    []string       `yaml:"required" json:"required" toml:"required"`
 	Match       RuleMatch      `yaml:"match" json:"match" toml:"match"`
 	Enum        RuleEnum       `yaml:"enum" json:"enum" toml:"enum"`
@@ -49,7 +57,7 @@ type Rule struct {
 }
 
 func (r Rule) Funcs(id string) []builtins.Checker {
-	check := builtins.New(id, r.Level, r.Description)
+	check := builtins.New(id, string(r.Level), r.Description)
 	var funcs []builtins.Checker
 
 	if len(r.Required) > 0 {
