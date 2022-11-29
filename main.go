@@ -65,10 +65,22 @@ func pathResolver(cwd string, path string) (string, error) {
 	return path, nil
 }
 
+func getCommit() string {
+	if commit == "" {
+		return "HEAD"
+	}
+
+	if len(commit) > 7 {
+		return commit[:7]
+	}
+
+	return commit
+}
+
 func main() {
 	app := &cli.App{
 		Name:    "flint",
-		Version: fmt.Sprintf("%s (%s), built at %s", version, commit[:8], date),
+		Version: fmt.Sprintf("%s (%s), built at %s", version, getCommit(), date),
 		Usage:   "extensible frontmatter linter",
 		Flags: []cli.Flag{
 			&cli.PathFlag{
