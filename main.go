@@ -195,7 +195,7 @@ func run(c *cli.Context) error {
 	if color {
 		fmt.Println(flint.StyleLightGray.Render((fmt.Sprintf("✨ flint took %s\n", time.Since(start)))))
 	} else {
-		fmt.Println(fmt.Sprintf("flint took %s\n", time.Since(start)))
+		fmt.Printf("flint took %s\n", time.Since(start))
 	}
 
 	if debug {
