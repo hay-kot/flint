@@ -44,7 +44,7 @@ func TestFmtFileErrors(t *testing.T) {
 				},
 			},
 			want: `test.md
-1:1    error    test    test description    TEST001
+   1:1    error    test    test description    TEST001
 `,
 		},
 		{
@@ -72,8 +72,8 @@ func TestFmtFileErrors(t *testing.T) {
 				},
 			},
 			want: `test.md
-1:1    error    test     test description    TEST001
-2:1    error    test2    test description    TEST001
+   1:1    error    test     test description    TEST001
+   2:1    error    test2    test description    TEST001
 `,
 		},
 	}
