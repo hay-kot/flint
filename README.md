@@ -1,13 +1,13 @@
 # Flint - Extensible Linter for Front Matter
 
-Flint is a customizable linter for frontmatter that can can be tailed to your projects needs. It uses a configuration file to define rule sets that can be applied conditionally to files based on their path.
+Flint is a customizable linter for frontmatter that can can be tailored to your projects needs. It uses a configuration file to define rule sets that can be applied conditionally to files based on their path.
 
 - Supported frontmatter formats:
   - YAML
   - <s>JSON</s> (coming soon!)
   - <s>TOML</s> (coming soon!)
 
-This library is still experimental and probably broken. Use at your own risk.
+This library is still experimental.
 
 ## Features
 
@@ -33,7 +33,7 @@ flint does nothing out of the box, you must initialize a configuration file in t
 
 ### Configuration
 
-The configuration has two areas (1) the `rules` and (2) the `content`. The rules is where you define a Key/Value pair of rules where the key is the ID of the rule and the value is the checks to be performed. The content is where you define the content to be linted and which rules to apply to it.
+The configuration has two areas (1) the `rules` and (2) the `content`. The rules is where you define a Key/Value pair of rules where the key is the ID of the rule and the value is the checks to be performed. The content is where you define the content to be linted and which rules to apply to it. You can write your configuration in YAML, JSON, or TOML, though we recommend YAML is it's the most readable.
 
 ```yaml
 rules:
@@ -51,6 +51,8 @@ content:
     rules:
       - FM001
 ```
+
+**Note:** If the configuration file cannot be found, flint will attempt to look for a glob match for a toml, json, or yaml file in the current directory, or the parent directory of the config path passed in. If you have multiple files that may match the glob, the first one found will be used. This may lead to unexpected results if you have multiple configuration files in your project. We recommend you use the `--config` flag to specify the path to your configuration file explicitly if you're using multiple configuration files.
 
 #### Rules
 
