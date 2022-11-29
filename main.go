@@ -94,6 +94,11 @@ func main() {
 				Usage:  "dumps debug information to stdout during run",
 				Hidden: true,
 			},
+			&cli.BoolFlag{
+				Name:  "color",
+				Usage: "enable/disable color output",
+				Value: true,
+			},
 		},
 		Action: run,
 		Commands: []*cli.Command{
@@ -112,9 +117,13 @@ func main() {
 
 func run(c *cli.Context) error {
 	var err error
-	start := time.Now()
 
-	debug := c.Bool("debug")
+	var (
+		start = time.Now()
+		color = c.Bool("color")
+		debug = c.Bool("debug")
+	)
+
 	cwd := c.Args().Get(0)
 
 	if cwd == "" {
@@ -170,16 +179,24 @@ func run(c *cli.Context) error {
 			sort.Strings(sorted)
 
 			for _, fp := range sorted {
-				fmt.Println(flint.FmtFileErrors(fp, errs[fp]))
+				fmt.Println(flint.FmtFileErrors(fp, errs[fp], flint.WithColor(color)))
 			}
 		default:
 			return fmt.Errorf("failed to run flint: %w", err)
 		}
 	} else {
-		fmt.Println(flint.StyleSuccess.Render("\n✓ No errors found"))
+		if color {
+			fmt.Println(flint.StyleSuccess.Render("\n✓ No errors found"))
+		} else {
+			fmt.Println("\n✓ No errors found")
+		}
 	}
 
-	fmt.Println(flint.StyleLightGray.Render((fmt.Sprintf("\n✨ flint took %s\n", time.Since(start)))))
+	if color {
+		fmt.Println(flint.StyleLightGray.Render((fmt.Sprintf("✨ flint took %s\n", time.Since(start)))))
+	} else {
+		fmt.Println(fmt.Sprintf("flint took %s\n", time.Since(start)))
+	}
 
 	if debug {
 		fmt.Println("debug information:")

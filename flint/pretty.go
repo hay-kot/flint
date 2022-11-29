@@ -9,13 +9,13 @@ import (
 )
 
 var (
-	StyleFilePath   = lipgloss.NewStyle().Bold(true).Underline(true)
-	StyleLightGray  = lipgloss.NewStyle().Foreground(lipgloss.Color("#52545A")).Bold(true)
-	StyleLineNumber = lipgloss.NewStyle().Foreground(lipgloss.Color("#52545A")).Bold(true).MarginLeft(3)
-	StyleSuccess    = lipgloss.NewStyle().Foreground(lipgloss.Color("#4CAF50"))
-	StyleInfo       = lipgloss.NewStyle().Foreground(lipgloss.Color("#2196F3"))
-	StyleError      = lipgloss.NewStyle().Foreground(lipgloss.Color("#AB3D30"))
-	StyleWarning    = lipgloss.NewStyle().Foreground(lipgloss.Color("#F25D18"))
+	Indent         = lipgloss.NewStyle().MarginLeft(3)
+	StyleFilePath  = lipgloss.NewStyle().Bold(true).Underline(true)
+	StyleLightGray = lipgloss.NewStyle().Foreground(lipgloss.Color("#52545A")).Bold(true)
+	StyleSuccess   = lipgloss.NewStyle().Foreground(lipgloss.Color("#4CAF50"))
+	StyleInfo      = lipgloss.NewStyle().Foreground(lipgloss.Color("#2196F3"))
+	StyleError     = lipgloss.NewStyle().Foreground(lipgloss.Color("#AB3D30"))
+	StyleWarning   = lipgloss.NewStyle().Foreground(lipgloss.Color("#F25D18"))
 )
 
 func or[T comparable](a, b T) T {
@@ -134,6 +134,8 @@ func fileErrTable(rows [][]string, color bool) string {
 
 			if color {
 				switch j {
+				case 0:
+					s = StyleLightGray.Render(s)
 				case 1: // Level
 					switch RuleLevel(strings.TrimSpace(s)) {
 					case LevelError:
@@ -146,8 +148,12 @@ func fileErrTable(rows [][]string, color bool) string {
 				case 2: // Field
 					break
 				default:
-					s = StyleLineNumber.Render(s)
+					s = StyleLightGray.Render(s)
 				}
+			}
+
+			if j == 0 {
+				s = Indent.Render(s)
 			}
 
 			table.WriteString(s)
