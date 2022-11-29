@@ -1,4 +1,17 @@
-# Flint - Extensible Linter for Front Matter
+<br />
+<div align="center">
+  <h3 align="center">Flint</h3>
+  <p align="center">
+    Customizable FrontMatter linter for your static site generator
+    <br />
+    <a href="#configuration"><strong>Config Reference »</strong></a>
+    <br />
+    <br />
+    <a href="https://github.com/hay-kot/flint/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/hay-kot/flint/issues">Request Feature</a>
+  </p>
+</div>
 
 Flint is a customizable linter for frontmatter that can can be tailored to your projects needs. It uses a configuration file to define rule sets that can be applied conditionally to files based on their path.
 
