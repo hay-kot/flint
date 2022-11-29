@@ -1,0 +1,14 @@
+rules:
+  FM001:
+    level: error
+    description: "required post fields are missing"
+    builtin.required:
+      - "title"
+      - "date"
+      - "slug"
+content:
+  - name: Blog Posts
+    paths:
+      - content/**/*.{md,html}
+    rules:
+      - FM001
