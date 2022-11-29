@@ -20,8 +20,8 @@ import (
 var example []byte
 
 var (
-	version = "0.1.0"
-	commit  = "dev"
+	version = "dev"
+	commit  = "HEAD"
 	date    = "unknown"
 
 	pattern = "flint.{yml,yaml,toml,json}"
