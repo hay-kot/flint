@@ -5,7 +5,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/BurntSushi/toml"
+	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -55,7 +55,7 @@ func Read(r io.Reader) (fm *FrontMatter, err error) {
 
 	switch fmFormat {
 	case formatTOML:
-		_, err = toml.Decode(string(content), &data)
+		err = toml.Unmarshal(content, &data)
 	case formatYAML:
 		err = yaml.Unmarshal(content, &data)
 		if err == nil {
