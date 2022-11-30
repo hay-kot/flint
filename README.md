@@ -37,6 +37,7 @@ This library is still experimental.
 - Powerful glob matching support
 - Customizable rule-sets
 - Customizable error messages
+- Report errors when no front matter is detected
 - Powerful builtin checks
   - Required fields
   - Regex matching
