@@ -1,16 +1,26 @@
 package frontmatter
 
 import (
-	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
 	"strings"
 
+	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
 )
 
 var (
 	ErrNoFrontMatter = errors.New("no front matter found")
+)
+
+type format int
+
+const (
+	formatUnknown format = iota
+	formatTOML
+	formatYAML
+	formatJSON
 )
 
 type result struct {
@@ -19,49 +29,81 @@ type result struct {
 }
 
 type FrontMatter struct {
+	format  format
 	content []byte
 	data    map[string]any
 	keys    []string
 	values  map[string]result
+
+	yamlNode *yaml.Node
 }
 
-func Read(r io.Reader) (*FrontMatter, error) {
-	data, content, err := read(r)
+// Read construct a new FrontMatter from the given reader.
+// Supported formats are
+//   - TOML
+//   - YAML
+func Read(r io.Reader) (fm *FrontMatter, err error) {
+	content, fmFormat, err := extractFrontMatter(r)
+	if err != nil {
+		return nil, err
+	}
+
+	if content == nil {
+		return nil, ErrNoFrontMatter
+	}
+
+	data := make(map[string]any)
+	yamlNode := yaml.Node{}
+
+	switch fmFormat {
+	case formatTOML:
+		err = toml.Unmarshal(content, &data)
+	case formatYAML:
+		err = yaml.Unmarshal(content, &data)
+		if err == nil {
+			err = yaml.Unmarshal(content, &yamlNode)
+		}
+	case formatJSON:
+		err = json.Unmarshal(content, &data)
+	}
+
 	if err != nil {
 		return nil, err
 	}
 
 	return &FrontMatter{
-		data:    data,
-		content: content,
+		format:   fmFormat,
+		content:  content,
+		data:     data,
+		yamlNode: &yamlNode,
 	}, nil
 }
 
-func read(r io.Reader) (data map[string]any, content []byte, err error) {
-	content, err = extractFrontMatter(r)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if content == nil {
-		return nil, nil, ErrNoFrontMatter
-	}
-
-	data = make(map[string]any)
-	err = yaml.Unmarshal(content, data)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return data, content, nil
-}
-
 // KeyCords returns the line and starting column of the given key.
-func (fm *FrontMatter) KeyCords(key string) (x int, y int) {
+func (fm *FrontMatter) KeyCords(key string) (line int, col int) {
 	parts := strings.Split(key, ".")
-	const offset = 2 // 2 line offset for 0 index and --- separator
 
-	return keyCordsFinder(bytes.Split(fm.content, NewLine), parts, offset)
+	const SeparatorOffset = 1
+
+	// Parse the YAML node to find the key
+	if fm.yamlNode == nil {
+		return -1, -1
+	}
+
+	switch fm.format {
+	case formatTOML:
+		return -1, -1
+	case formatYAML:
+		line, col = yamlFindLineAndCol(fm.yamlNode, parts)
+	case formatJSON:
+		return -1, -1
+	}
+
+	if line == -1 {
+		return -1, -1
+	}
+
+	return line + SeparatorOffset, col
 }
 
 // Content returns a copy of the byte slice containing the content of the
@@ -84,8 +126,6 @@ func (fm *FrontMatter) Data() map[string]any {
 // Get returns the value of the given key. If the key is not found, the
 // default value is returned and ok is false.
 func (fm *FrontMatter) Get(key string) (any, bool) {
-	parts := strings.Split(key, ".")
-
 	if fm.values == nil {
 		fm.values = make(map[string]result)
 	}
@@ -93,6 +133,7 @@ func (fm *FrontMatter) Get(key string) (any, bool) {
 	v, ok := fm.values[key]
 
 	if !ok {
+		parts := strings.Split(key, ".")
 		var val any
 		val, ok = get(fm.data, parts)
 		v = result{

@@ -3,62 +3,59 @@ package frontmatter
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 )
 
 var (
-	YAMLSeparator = []byte("---")
-	NewLine       = []byte("\n")
+	YAMLSeparator      = []byte("---")
+	TOMLSeparator      = []byte("+++")
+	JSONSeparatorStart = []byte("{")
+	JSONSeparatorEnd   = []byte("}")
+	NewLine            = []byte("\n")
 )
 
-func keyCordsFinder(lines [][]byte, keyPath []string, offset int) (x int, y int) {
-	line, col, take := -1, 0, 0
-
-	for i, l := range lines {
-		key := keyPath[0]
-		if bytes.Contains(l, []byte(key+":")) {
-			line = (i + offset)
-			offset += i
-			take = i
-			for j, c := range l {
-				if c != ' ' {
-					col = j + 1
-
-					break
-				}
-			}
-			break
-		}
+func isSeparator(line []byte, first bool) bool {
+	if first {
+		return bytes.Equal(line, YAMLSeparator) || bytes.Equal(line, TOMLSeparator) || bytes.Equal(line, JSONSeparatorStart)
 	}
 
-	if line == -1 {
-		return -1, -1
-	}
-
-	if len(keyPath) == 1 {
-		return line, col
-	}
-
-	return keyCordsFinder(lines[take:], keyPath[1:], offset)
+	return bytes.Equal(line, YAMLSeparator) || bytes.Equal(line, TOMLSeparator) || bytes.Equal(line, JSONSeparatorEnd)
 }
 
-func extractFrontMatter(r io.Reader) ([]byte, error) {
+func extractFrontMatter(r io.Reader) ([]byte, format, error) {
 	bits := make([]byte, 0)
 
 	first := false
 	success := false
 
+	fmFormat := formatUnknown
+
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Bytes()
 
-		if !first && bytes.Equal(line, YAMLSeparator) {
+		if !first && isSeparator(line, true) {
 			first = true
+
+			switch {
+			case bytes.Equal(line, YAMLSeparator):
+				fmFormat = formatYAML
+			case bytes.Equal(line, TOMLSeparator):
+				fmFormat = formatTOML
+			case bytes.Equal(line, JSONSeparatorStart):
+				fmFormat = formatJSON
+				bits = append(bits, line...)
+			}
+
 			continue
 		}
 
-		if first && bytes.Equal(line, YAMLSeparator) {
+		if first && isSeparator(line, false) {
 			success = true
+			if fmFormat == formatJSON {
+				bits = append(bits, line...)
+			}
 			break
 		}
 
@@ -66,8 +63,8 @@ func extractFrontMatter(r io.Reader) ([]byte, error) {
 	}
 
 	if !success {
-		return nil, nil
+		return nil, fmFormat, errors.New("frontmatter: no front matter found")
 	}
 
-	return bits, nil
+	return bits, fmFormat, nil
 }

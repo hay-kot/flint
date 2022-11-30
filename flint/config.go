@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/BurntSushi/toml"
+	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,21 +29,16 @@ const (
 
 func ReadConfig(r io.Reader, format ConfigFormat) (*Config, error) {
 	var c Config
+	var err error
 
 	switch format {
 	case JSON:
-		if err := json.NewDecoder(r).Decode(&c); err != nil {
-			return nil, err
-		}
+		err = json.NewDecoder(r).Decode(&c)
 	case TOML:
-		if _, err := toml.NewDecoder(r).Decode(&c); err != nil {
-			return nil, err
-		}
+		err = toml.NewDecoder(r).Decode(&c)
 	case YAML:
-		if err := yaml.NewDecoder(r).Decode(&c); err != nil {
-			return nil, err
-		}
+		err = yaml.NewDecoder(r).Decode(&c)
 	}
 
-	return &c, nil
+	return &c, err
 }

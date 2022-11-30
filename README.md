@@ -17,8 +17,14 @@ Flint is a customizable linter for frontmatter that can can be tailored to your 
 
 - Supported frontmatter formats:
   - YAML
-  - <s>JSON</s> (coming soon!)
-  - <s>TOML</s> (coming soon!)
+  - JSON (Partial)
+  - TOML (Partial)
+
+| Format | Linting | Line / Col |
+| ------ | :-----: | :--------: |
+| YAML   |    ✓    |     ✓      |
+| JSON   |    ✓    |     ✖      |
+| TOML   |    ✓    |     ✖      |
 
 This library is still experimental.
 
