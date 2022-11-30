@@ -3,61 +3,46 @@ package frontmatter
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 )
 
 var (
 	YAMLSeparator = []byte("---")
+	TOMLSeparator = []byte("+++")
 	NewLine       = []byte("\n")
 )
 
-func keyCordsFinder(lines [][]byte, keyPath []string, offset int) (x int, y int) {
-	line, col, take := -1, 0, 0
-
-	for i, l := range lines {
-		key := keyPath[0]
-		if bytes.Contains(l, []byte(key+":")) {
-			line = (i + offset)
-			offset += i
-			take = i
-			for j, c := range l {
-				if c != ' ' {
-					col = j + 1
-
-					break
-				}
-			}
-			break
-		}
-	}
-
-	if line == -1 {
-		return -1, -1
-	}
-
-	if len(keyPath) == 1 {
-		return line, col
-	}
-
-	return keyCordsFinder(lines[take:], keyPath[1:], offset)
+func isSeparator(line []byte) bool {
+	return bytes.Equal(line, YAMLSeparator) || bytes.Equal(line, TOMLSeparator)
 }
 
-func extractFrontMatter(r io.Reader) ([]byte, error) {
+func extractFrontMatter(r io.Reader) ([]byte, format, error) {
 	bits := make([]byte, 0)
 
 	first := false
 	success := false
 
+	fmFormat := formatUnknown
+
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		line := scanner.Bytes()
 
-		if !first && bytes.Equal(line, YAMLSeparator) {
+		if !first && isSeparator(line) {
 			first = true
+
+			switch {
+			case bytes.Equal(line, YAMLSeparator):
+				fmFormat = formatYAML
+			case bytes.Equal(line, TOMLSeparator):
+				fmFormat = formatTOML
+			}
+
 			continue
 		}
 
-		if first && bytes.Equal(line, YAMLSeparator) {
+		if first && isSeparator(line) {
 			success = true
 			break
 		}
@@ -66,8 +51,8 @@ func extractFrontMatter(r io.Reader) ([]byte, error) {
 	}
 
 	if !success {
-		return nil, nil
+		return nil, fmFormat, errors.New("frontmatter: no front matter found")
 	}
 
-	return bits, nil
+	return bits, fmFormat, nil
 }

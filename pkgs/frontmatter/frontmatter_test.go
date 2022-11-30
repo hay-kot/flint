@@ -10,7 +10,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var YAMLFrontMatter = `---
+func tomlReader() io.Reader { return strings.NewReader(tomlString) }
+
+var tomlString = `+++
+[before]
+  title = "Hello World"
+
+tags = [ "foo", "bar" ]
+categories = [ "foo", "bar" ]
+title = "Hello World"
+date = 2012-12-12T00:00:00.000Z
+
+[nested]
+key = "value"
++++`
+
+func yamlReader() io.Reader { return strings.NewReader(yamlString) }
+
+var yamlString = `---
+before:
+  title: Hello World
 tags:
   - foo
   - bar
@@ -23,22 +42,56 @@ nested:
   key: value
 ---`
 
-func TestRead_YAML(t *testing.T) {
-	assert := assert.New(t)
+var data = map[string]interface{}{
+	"tags": []interface{}{
+		"foo",
+		"bar",
+	},
+	"categories": []interface{}{
+		"foo",
+		"bar",
+	},
+	"title": "Hello World",
+	"date":  time.Date(2012, 12, 12, 0, 0, 0, 0, time.UTC),
+	"nested": map[string]interface{}{
+		"key": "value",
+	},
+}
 
-	reader := strings.NewReader(YAMLFrontMatter)
-
-	fm, err := frontmatter.Read(reader)
-	assert.NoError(err)
-
-	data := fm.Data()
-
-	assert.Equal("Hello World", data["title"])
-	assert.Equal([]interface{}{"foo", "bar"}, data["tags"])
-	assert.Equal([]interface{}{"foo", "bar"}, data["categories"])
-
-	dt, _ := time.Parse("2006-01-02", "2012-12-12")
-	assert.Equal(dt, data["date"])
+func Test_FrontMatter_Read(t *testing.T) {
+	type args struct {
+		r io.Reader
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantData map[string]any
+		wantErr  bool
+	}{
+		{
+			name: "YAML",
+			args: args{
+				r: strings.NewReader(yamlString),
+			},
+			wantData: data,
+			wantErr:  false,
+		},
+		{
+			name: "TOML",
+			args: args{
+				r: strings.NewReader(tomlString),
+			},
+			wantData: data,
+			wantErr:  false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := frontmatter.Read(tt.args.r)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.wantData, got.Data())
+		})
+	}
 }
 
 func TestFrontMatter_KeyCords(t *testing.T) {
@@ -46,37 +99,62 @@ func TestFrontMatter_KeyCords(t *testing.T) {
 		key string
 	}
 	tests := []struct {
-		name  string
-		args  args
-		wantX int
-		wantY int
+		reader   io.Reader
+		name     string
+		args     args
+		wantLine int
+		wantCol  int
 	}{
 		{
-			name:  "title (string)",
-			args:  args{key: "title"},
-			wantX: 8,
-			wantY: 1,
+			reader:   yamlReader(),
+			name:     "YAML: title (string)",
+			args:     args{key: "title"},
+			wantLine: 10,
+			wantCol:  1,
 		},
 		{
-			name:  "tags (array)",
-			args:  args{key: "tags"},
-			wantX: 2,
-			wantY: 1,
+			reader:   yamlReader(),
+			name:     "YAML: tags (array)",
+			args:     args{key: "tags"},
+			wantLine: 4,
+			wantCol:  1,
 		},
 		{
-			name:  "nested.key (string)",
-			args:  args{key: "nested.key"},
-			wantX: 11,
-			wantY: 3,
+			reader:   yamlReader(),
+			name:     "YAML: nested.key (string)",
+			args:     args{key: "nested.key"},
+			wantLine: 13,
+			wantCol:  3,
+		},
+		{
+			reader:   tomlReader(),
+			name:     "TOML: title (string)",
+			args:     args{key: "title"},
+			wantLine: 4,
+			wantCol:  1,
+		},
+		{
+			reader:   tomlReader(),
+			name:     "TOML: tags (array)",
+			args:     args{key: "tags"},
+			wantLine: 2,
+			wantCol:  1,
+		},
+		{
+			reader:   tomlReader(),
+			name:     "TOML: nested.key (string)",
+			args:     args{key: "nested.key"},
+			wantLine: 11,
+			wantCol:  3,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fm, _ := frontmatter.Read(strings.NewReader(YAMLFrontMatter))
-			gotX, gotY := fm.KeyCords(tt.args.key)
+			fm, _ := frontmatter.Read(tt.reader)
+			gotLine, gotCol := fm.KeyCords(tt.args.key)
 
-			assert.Equal(t, tt.wantX, gotX, "(X) Row Mismatch: want=%d got=%d", tt.wantX, gotX)
-			assert.Equal(t, tt.wantY, gotY, "(Y) Col Mismatch: want=%d got=%d", tt.wantY, gotY)
+			assert.Equal(t, tt.wantLine, gotLine, "Row Mismatch: want=%d got=%d", tt.wantLine, gotLine)
+			assert.Equal(t, tt.wantCol, gotCol, "Col Mismatch: want=%d got=%d", tt.wantCol, gotCol)
 		})
 	}
 }
@@ -89,7 +167,7 @@ func TestFrontMatter_Content(t *testing.T) {
 	}{
 		{
 			name: "YAML",
-			args: strings.NewReader(YAMLFrontMatter),
+			args: strings.NewReader(yamlString),
 			want: []byte(`tags:
   - foo
   - bar
@@ -124,7 +202,7 @@ func TestFrontMatter_Data(t *testing.T) {
 	}{
 		{
 			name: "YAML",
-			args: strings.NewReader(YAMLFrontMatter),
+			args: strings.NewReader(yamlString),
 			want: map[string]any{
 				"tags":       []interface{}{"foo", "bar"},
 				"categories": []interface{}{"foo", "bar"},
@@ -180,7 +258,7 @@ func TestFrontMatter_Get(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fm, _ := frontmatter.Read(strings.NewReader(YAMLFrontMatter))
+			fm, _ := frontmatter.Read(strings.NewReader(yamlString))
 			got, ok := fm.Get(tt.args.key)
 
 			assert.Equal(t, tt.wantOk, ok, "Ok Mismatch: want=%t got=%t", tt.wantOk, ok)
@@ -221,7 +299,7 @@ func TestFrontMatter_Has(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fm, _ := frontmatter.Read(strings.NewReader(YAMLFrontMatter))
+			fm, _ := frontmatter.Read(strings.NewReader(yamlString))
 			assert.Equal(t, tt.want, fm.Has(tt.args.key))
 		})
 	}
@@ -245,7 +323,7 @@ func TestFrontMatter_Keys(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fm, _ := frontmatter.Read(strings.NewReader(YAMLFrontMatter))
+			fm, _ := frontmatter.Read(strings.NewReader(yamlString))
 			assert.ElementsMatch(t, tt.want, fm.Keys())
 		})
 	}
