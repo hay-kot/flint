@@ -8,13 +8,19 @@ import (
 )
 
 var (
-	YAMLSeparator = []byte("---")
-	TOMLSeparator = []byte("+++")
-	NewLine       = []byte("\n")
+	YAMLSeparator      = []byte("---")
+	TOMLSeparator      = []byte("+++")
+	JSONSeparatorStart = []byte("{")
+	JSONSeparatorEnd   = []byte("}")
+	NewLine            = []byte("\n")
 )
 
-func isSeparator(line []byte) bool {
-	return bytes.Equal(line, YAMLSeparator) || bytes.Equal(line, TOMLSeparator)
+func isSeparator(line []byte, first bool) bool {
+	if first {
+		return bytes.Equal(line, YAMLSeparator) || bytes.Equal(line, TOMLSeparator) || bytes.Equal(line, JSONSeparatorStart)
+	}
+
+	return bytes.Equal(line, YAMLSeparator) || bytes.Equal(line, TOMLSeparator) || bytes.Equal(line, JSONSeparatorEnd)
 }
 
 func extractFrontMatter(r io.Reader) ([]byte, format, error) {
@@ -29,7 +35,7 @@ func extractFrontMatter(r io.Reader) ([]byte, format, error) {
 	for scanner.Scan() {
 		line := scanner.Bytes()
 
-		if !first && isSeparator(line) {
+		if !first && isSeparator(line, true) {
 			first = true
 
 			switch {
@@ -37,13 +43,19 @@ func extractFrontMatter(r io.Reader) ([]byte, format, error) {
 				fmFormat = formatYAML
 			case bytes.Equal(line, TOMLSeparator):
 				fmFormat = formatTOML
+			case bytes.Equal(line, JSONSeparatorStart):
+				fmFormat = formatJSON
+				bits = append(bits, line...)
 			}
 
 			continue
 		}
 
-		if first && isSeparator(line) {
+		if first && isSeparator(line, false) {
 			success = true
+			if fmFormat == formatJSON {
+				bits = append(bits, line...)
+			}
 			break
 		}
 

@@ -1,6 +1,7 @@
 package frontmatter
 
 import (
+	"encoding/json"
 	"errors"
 	"io"
 	"strings"
@@ -19,6 +20,7 @@ const (
 	formatUnknown format = iota
 	formatTOML
 	formatYAML
+	formatJSON
 )
 
 type result struct {
@@ -61,6 +63,8 @@ func Read(r io.Reader) (fm *FrontMatter, err error) {
 		if err == nil {
 			err = yaml.Unmarshal(content, &yamlNode)
 		}
+	case formatJSON:
+		err = json.Unmarshal(content, &data)
 	}
 
 	if err != nil {
@@ -91,6 +95,8 @@ func (fm *FrontMatter) KeyCords(key string) (line int, col int) {
 		return -1, -1
 	case formatYAML:
 		line, col = yamlFindLineAndCol(fm.yamlNode, parts)
+	case formatJSON:
+		return -1, -1
 	}
 
 	if line == -1 {
