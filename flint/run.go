@@ -1,6 +1,7 @@
 package flint
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,6 +10,15 @@ import (
 	"github.com/hay-kot/flint/flint/builtins"
 	"github.com/hay-kot/flint/pkgs/frontmatter"
 )
+
+type FileError struct {
+	Path string
+	Err  error
+}
+
+func (fe FileError) Error() string {
+	return fmt.Sprintf("%s: %s", fe.Path, fe.Err)
+}
 
 type FlintErrors map[string][]error
 
@@ -58,7 +68,15 @@ func (conf *Config) Run(cwd string) (int, error) {
 			f.Close()
 
 			if err != nil {
-				return 0, fmt.Errorf("failed to read frontmatter from %s: %w", m, err)
+				if errors.Is(err, frontmatter.ErrNoFrontMatter) {
+					errs[m] = append(errs[m], FileError{
+						Path: m,
+						Err:  err,
+					})
+					continue
+				}
+
+				return 0, fmt.Errorf("failed to read frontmatter unknown error: %w", err)
 			}
 
 			for _, check := range allChecks {

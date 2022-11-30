@@ -42,13 +42,10 @@ type FrontMatter struct {
 // Supported formats are
 //   - TOML
 //   - YAML
+//   - JSON
 func Read(r io.Reader) (fm *FrontMatter, err error) {
 	content, fmFormat, err := extractFrontMatter(r)
 	if err != nil {
-		return nil, err
-	}
-
-	if content == nil {
 		return nil, ErrNoFrontMatter
 	}
 

@@ -96,6 +96,14 @@ func FmtFileErrors(path string, e []error, optfn ...prettyOptionFunc) string {
 						err.ID,
 					})
 				}
+			case FileError:
+				cols = append(cols, []string{
+					"0:0",
+					"error",
+					"file",
+					err.Error(),
+					"",
+				})
 			}
 		}
 	}
@@ -107,6 +115,7 @@ func FmtFileErrors(path string, e []error, optfn ...prettyOptionFunc) string {
 	}
 	bldr.WriteString("\n")
 	bldr.WriteString(fileErrTable(cols, opts.color))
+	bldr.WriteString("\n")
 	return bldr.String()
 }
 

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	_ "embed"
@@ -178,9 +179,13 @@ func run(c *cli.Context) error {
 			}
 			sort.Strings(sorted)
 
+			bldr := strings.Builder{}
+
 			for _, fp := range sorted {
-				fmt.Println(flint.FmtFileErrors(fp, errs[fp], flint.WithColor(color)))
+				bldr.WriteString(flint.FmtFileErrors(fp, errs[fp], flint.WithColor(color)))
 			}
+
+			fmt.Println(bldr.String())
 		default:
 			return fmt.Errorf("failed to run flint: %w", err)
 		}
