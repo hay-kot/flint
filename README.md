@@ -28,6 +28,10 @@ Flint is a customizable linter for frontmatter that can can be tailored to your 
 
 This library is still experimental.
 
+**Example Output**
+
+<img height="500" src="https://user-images.githubusercontent.com/64056131/204726580-3fa7c1d9-cc60-43bc-bac0-6c4b14c3d698.jpg"></img>
+
 ## Features
 
 - Powerful glob matching support
