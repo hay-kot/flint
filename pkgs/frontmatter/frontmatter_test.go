@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func tomlReader() io.Reader { return strings.NewReader(tomlString) }
+// func tomlReader() io.Reader { return strings.NewReader(tomlString) }
 
 var tomlString = `+++
 tags = [ "foo", "bar" ]
