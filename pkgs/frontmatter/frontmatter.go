@@ -120,8 +120,6 @@ func (fm *FrontMatter) Data() map[string]any {
 // Get returns the value of the given key. If the key is not found, the
 // default value is returned and ok is false.
 func (fm *FrontMatter) Get(key string) (any, bool) {
-	parts := strings.Split(key, ".")
-
 	if fm.values == nil {
 		fm.values = make(map[string]result)
 	}
@@ -129,6 +127,7 @@ func (fm *FrontMatter) Get(key string) (any, bool) {
 	v, ok := fm.values[key]
 
 	if !ok {
+		parts := strings.Split(key, ".")
 		var val any
 		val, ok = get(fm.data, parts)
 		v = result{
