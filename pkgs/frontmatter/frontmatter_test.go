@@ -6,41 +6,26 @@ import (
 	"testing"
 	"time"
 
+	_ "embed"
+
 	"github.com/hay-kot/flint/pkgs/frontmatter"
 	"github.com/stretchr/testify/assert"
 )
 
-// func tomlReader() io.Reader { return strings.NewReader(tomlString) }
+func jsonReader() io.Reader { return strings.NewReader(jsonString) }
 
-var tomlString = `+++
-tags = [ "foo", "bar" ]
-categories = [ "foo", "bar" ]
-title = "Hello World"
-date = 2012-12-12T00:00:00.000Z
+//go:embed tests/json.md
+var jsonString string
 
-[before]
-title = "Hello World"
+func tomlReader() io.Reader { return strings.NewReader(tomlString) }
 
-[nested]
-key = "value"
-+++`
+//go:embed tests/yaml.md
+var tomlString string
 
 func yamlReader() io.Reader { return strings.NewReader(yamlString) }
 
-var yamlString = `---
-before:
-  title: Hello World
-tags:
-  - foo
-  - bar
-categories:
-  - foo
-  - bar
-title: Hello World
-date: 2012-12-12
-nested:
-  key: value
----`
+//go:embed tests/yaml.md
+var yamlString string
 
 var data = map[string]interface{}{
 	"before": map[string]interface{}{
@@ -74,7 +59,7 @@ func Test_FrontMatter_Read(t *testing.T) {
 		{
 			name: "YAML",
 			args: args{
-				r: strings.NewReader(yamlString),
+				r: yamlReader(),
 			},
 			wantData: data,
 			wantErr:  false,
@@ -82,7 +67,15 @@ func Test_FrontMatter_Read(t *testing.T) {
 		{
 			name: "TOML",
 			args: args{
-				r: strings.NewReader(tomlString),
+				r: tomlReader(),
+			},
+			wantData: data,
+			wantErr:  false,
+		},
+		{
+			name: "JSON",
+			args: args{
+				r: jsonReader(),
 			},
 			wantData: data,
 			wantErr:  false,
@@ -92,7 +85,20 @@ func Test_FrontMatter_Read(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := frontmatter.Read(tt.args.r)
 			assert.NoError(t, err)
-			assert.Equal(t, tt.wantData, got.Data())
+
+			data := got.Data()
+
+			assert.Equal(t, tt.wantData["before"], data["before"])
+			assert.Equal(t, tt.wantData["tags"], data["tags"])
+			assert.Equal(t, tt.wantData["categories"], data["categories"])
+			assert.Equal(t, tt.wantData["title"], data["title"])
+			assert.Equal(t, tt.wantData["nested"], data["nested"])
+
+			if tt.name != "JSON" {
+				assert.Equal(t, tt.wantData["date"], data["date"])
+			} else {
+				assert.Equal(t, "2012-12-12T00:00:00.000Z", data["date"])
+			}
 		})
 	}
 }
