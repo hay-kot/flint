@@ -24,7 +24,7 @@ func (b BuiltIns) RequiredFunc(required []string) Checker {
 				})
 			}
 
-			return FieldErrors{
+			return &FieldErrors{
 				ID:          b.ID,
 				Level:       b.Level,
 				Description: b.Description,

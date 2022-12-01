@@ -58,7 +58,7 @@ func TestBuiltIns_Match(t *testing.T) {
 					return
 				}
 
-				assert.ErrorAs(t, err, &ValueErrors{})
+				assert.True(t, IsValueErrors(err))
 			case (err != nil) != tt.wantErr:
 				t.Errorf("BuiltIns.MatchFunc() error = %v, wantErr %v", err, tt.wantErr)
 				return

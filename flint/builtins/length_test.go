@@ -71,7 +71,7 @@ func TestBuiltIns_Length(t *testing.T) {
 					return
 				}
 
-				assert.ErrorAs(t, err, &ValueErrors{})
+				assert.True(t, IsValueErrors(err))
 			case (err != nil) != tt.wantErr:
 				t.Errorf("BuiltIns.LengthFunc() error = %v, wantErr %v", err, tt.wantErr)
 			}

@@ -1,5 +1,7 @@
 package builtins
 
+import "errors"
+
 type ValueError struct {
 	Line        string
 	Description string
@@ -13,15 +15,15 @@ type ValueErrors struct {
 	Errors      []ValueError
 }
 
-func newValueErrors(id, level, description string) ValueErrors {
-	return ValueErrors{
+func newValueErrors(id, level, description string) *ValueErrors {
+	return &ValueErrors{
 		ID:          id,
 		Level:       level,
 		Description: description,
 	}
 }
 
-func (m ValueErrors) Error() string {
+func (m *ValueErrors) Error() string {
 	return "match failed"
 }
 
@@ -34,6 +36,16 @@ type FieldErrors struct {
 	Fields      []FieldError
 }
 
-func (e FieldErrors) Error() string {
+func (e *FieldErrors) Error() string {
 	return "required keys missing"
+}
+
+func IsValueErrors(err error) bool {
+	var e *ValueErrors
+	return errors.As(err, &e)
+}
+
+func IsFieldErrors(err error) bool {
+	var e *FieldErrors
+	return errors.As(err, &e)
 }

@@ -29,7 +29,7 @@ func TestFmtFileErrors(t *testing.T) {
 			args: args{
 				path: "test.md",
 				e: []error{
-					builtins.ValueErrors{
+					&builtins.ValueErrors{
 						ID:          "TEST001",
 						Level:       "error",
 						Description: "test description",
@@ -53,7 +53,7 @@ func TestFmtFileErrors(t *testing.T) {
 			args: args{
 				path: "test.md",
 				e: []error{
-					builtins.ValueErrors{
+					&builtins.ValueErrors{
 						ID:          "TEST001",
 						Level:       "error",
 						Description: "test description",
