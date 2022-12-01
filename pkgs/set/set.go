@@ -55,6 +55,18 @@ func (s *Set[T]) Len() int {
 	return len(s.mp)
 }
 
+// Intersection returns a new set that contains the elements that are in the
+// receiver and the provided set.
+func (s *Set[T]) Intersection(o *Set[T]) *Set[T] {
+	mp := make(map[T]struct{}, len(s.mp))
+	for k := range s.mp {
+		if o.Contains(k) {
+			mp[k] = struct{}{}
+		}
+	}
+	return &Set[T]{mp}
+}
+
 // Missing returns a new set containing the elements in the provided set that
 // are not in the current set.
 func (s *Set[T]) Missing(required *Set[T]) *Set[T] {

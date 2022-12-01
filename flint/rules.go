@@ -54,6 +54,7 @@ type Rule struct {
 	Enum        RuleEnum       `yaml:"enum" json:"enum" toml:"enum"`
 	DateFormat  RuleDateFormat `yaml:"date" json:"date" toml:"date"`
 	Length      RuleLength     `yaml:"length" json:"length" toml:"length"`
+	Disallowed  []string       `yaml:"disallowed" json:"disallowed" toml:"disallowed"`
 }
 
 func (r Rule) Funcs(id string) []builtins.Checker {
@@ -62,6 +63,10 @@ func (r Rule) Funcs(id string) []builtins.Checker {
 
 	if len(r.Required) > 0 {
 		funcs = append(funcs, check.RequiredFunc(r.Required))
+	}
+
+	if len(r.Disallowed) > 0 {
+		funcs = append(funcs, check.DisallowedFunc(r.Disallowed))
 	}
 
 	if len(r.Enum.Fields) > 0 {

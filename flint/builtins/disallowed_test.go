@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBuiltIns_RequiredFunc(t *testing.T) {
+func TestBuiltIns_DisallowedFunc(t *testing.T) {
 	type args struct {
-		required []string
+		disallowed []string
 	}
 	tests := []struct {
 		name    string
@@ -20,23 +20,23 @@ func TestBuiltIns_RequiredFunc(t *testing.T) {
 		{
 			name: "basic key match",
 			args: args{
-				required: []string{"date"},
+				disallowed: []string{"date"},
 			},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "nested match",
 			args: args{
-				required: []string{"key.nested", "title", "nested.slug"},
+				disallowed: []string{"key.nested", "title", "nested.slug"},
 			},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "missing key",
 			args: args{
-				required: []string{"banana"},
+				disallowed: []string{"banana"},
 			},
-			wantErr: true,
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
@@ -44,20 +44,15 @@ func TestBuiltIns_RequiredFunc(t *testing.T) {
 			b := New("test", "test", "test")
 			fm, _ := frontmatter.Read(strings.NewReader(yml))
 
-			check := b.RequiredFunc(tt.args.required)
+			check := b.DisallowedFunc(tt.args.disallowed)
 			err := check(fm)
 
-			switch {
-			case tt.wantErr:
-				if err == nil {
-					t.Errorf("BuiltIns.RequiredFunc() error = %v, wantErr %v", err, tt.wantErr)
-					return
-				}
-
+			switch tt.wantErr {
+			case true:
+				assert.Error(t, err)
 				assert.True(t, IsFieldErrors(err))
-			case (err != nil) != tt.wantErr:
-				t.Errorf("BuiltIns.RequiredFunc() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			case false:
+				assert.NoError(t, err)
 			}
 		})
 	}
