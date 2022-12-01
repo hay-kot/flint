@@ -12,7 +12,7 @@ func (b BuiltIns) RequiredFunc(required []string) Checker {
 	requiredSet := set.New(required...)
 
 	return func(fm *frontmatter.FrontMatter) error {
-		fmKeys := set.New(fm.Keys()...)
+		fmKeys := fm.Keys()
 		missing := fmKeys.Missing(requiredSet)
 
 		if missing.Len() > 0 {

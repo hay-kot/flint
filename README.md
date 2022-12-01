@@ -116,6 +116,19 @@ rules:
       - "author.email"
 ```
 
+##### `disallowed`
+
+This rule checks to see if a key is defined in the front matter and if it is, will result in an error. Useful for checking for keys that should not be present. It's values is a list of strings
+
+```yaml
+rules:
+  FM003:
+    level: error
+    description: "disallowed key"
+    disallowed:
+      - "disallowed_key"
+```
+
 ##### `match`
 
 This rules checks to see if the regular expressions defined in the array match the values of the fields defined in the array. You can provide multiple regular expressions and field, just keep in mind that every regex will be applied to each field.

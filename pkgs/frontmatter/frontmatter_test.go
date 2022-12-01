@@ -327,7 +327,7 @@ func TestFrontMatter_Keys(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fm, _ := frontmatter.Read(strings.NewReader(yamlString))
-			assert.ElementsMatch(t, tt.want, fm.Keys())
+			assert.ElementsMatch(t, tt.want, fm.Keys().Slice())
 		})
 	}
 }

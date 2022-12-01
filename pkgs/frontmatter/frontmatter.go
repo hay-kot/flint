@@ -6,6 +6,7 @@ import (
 	"io"
 	"strings"
 
+	"github.com/hay-kot/flint/pkgs/set"
 	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
 )
@@ -32,7 +33,7 @@ type FrontMatter struct {
 	format  format
 	content []byte
 	data    map[string]any
-	keys    []string
+	keys    *set.ImmutableSet[string]
 	values  map[string]result
 
 	yamlNode *yaml.Node
@@ -173,14 +174,12 @@ func (fm *FrontMatter) Has(key string) bool {
 }
 
 // Keys returns a slice of all keys in the front matter.
-func (fm *FrontMatter) Keys() []string {
+func (fm *FrontMatter) Keys() *set.ImmutableSet[string] {
 	if fm.keys == nil {
-		fm.keys = keys(fm.data)
+		fm.keys = set.NewImmutable(keys(fm.data)...)
 	}
 
-	cp := make([]string, len(fm.keys))
-	copy(cp, fm.keys)
-	return cp
+	return fm.keys
 }
 
 func keys(data map[string]any) []string {
