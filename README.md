@@ -44,6 +44,7 @@ This library is still experimental.
   - Enums Sets
   - Date Format
   - Field Length
+  - Disallowed Fields
   - <s>Field types</s> (coming soon!)
   - <s>Asset Existence</s> (coming soon!)
 
