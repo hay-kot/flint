@@ -11,7 +11,7 @@ func (b BuiltIns) DisallowedFunc(disallowed []string) Checker {
 	disallowedSet := set.New(disallowed...)
 
 	return func(fm *frontmatter.FrontMatter) error {
-		fmKeys := set.New(fm.Keys()...)
+		fmKeys := fm.Keys()
 		has := fmKeys.Intersection(disallowedSet)
 
 		if has.Len() > 0 {
