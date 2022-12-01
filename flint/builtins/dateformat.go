@@ -8,6 +8,22 @@ import (
 )
 
 func (b BuiltIns) DateFormatFunc(formats []string, fields []string) Checker {
+	if len(formats) == 0 {
+		formats = []string{
+			time.Layout,
+			time.ANSIC,
+			time.UnixDate,
+			time.RubyDate,
+			time.RFC822,
+			time.RFC822Z,
+			time.RFC850,
+			time.RFC1123,
+			time.RFC1123Z,
+			time.RFC3339,
+			time.RFC3339Nano,
+		}
+	}
+
 	return func(fm *frontmatter.FrontMatter) error {
 		errGroup := newValueErrors(b.ID, b.Level, b.Description)
 

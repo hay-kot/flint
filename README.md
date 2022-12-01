@@ -102,7 +102,7 @@ The value represents the configuration for the rule set being created. Flint com
 
 #### Built-in Rules
 
-##### `bultin.required`
+##### `required`
 
 This rule checks to see if the keys defined in the array are present in the front matter. It's values is a list of strings
 
@@ -155,7 +155,9 @@ Supported types are `string` and `[]string`
 
 ##### `date`
 
-checks to see if the date is in the correct format. The format is defined using the [Go time package](https://golang.org/pkg/time/#pkg-constants)
+checks to see if the date is in the correct format. The format is defined using the [Go Time package](https://golang.org/pkg/time/#pkg-constants) string format.
+
+If the format property not defined it will default to all parsable formats defined in the [Go Time package](https://golang.org/pkg/time/#pkg-constants).
 
 Supported types are `string`
 
