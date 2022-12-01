@@ -42,6 +42,22 @@ func TestBuiltIns_DateFormat(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "no format pass (defaults to all)",
+			args: args{
+				formats: []string{},
+				fields:  []string{"date", "date_RFC3339", "date_RFC850"},
+			},
+			wantErr: false,
+		},
+		{
+			name: "no format formats failure (defaults to all)",
+			args: args{
+				formats: []string{},
+				fields:  []string{"date_RFC3339_bad", "date_RFC850_bad"},
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -58,7 +74,7 @@ func TestBuiltIns_DateFormat(t *testing.T) {
 					return
 				}
 
-				assert.ErrorAs(t, err, &ValueErrors{})
+				assert.True(t, IsValueErrors(err))
 			case (err != nil) != tt.wantErr:
 				t.Errorf("BuiltIns.DateFormatFunc() error = %v, wantErr %v", err, tt.wantErr)
 				return
