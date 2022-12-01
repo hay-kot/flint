@@ -66,7 +66,7 @@ func TestBuiltIns_Enum(t *testing.T) {
 					return
 				}
 
-				assert.ErrorAs(t, err, &ValueErrors{})
+				assert.True(t, IsValueErrors(err))
 			case (err != nil) != tt.wantErr:
 				t.Errorf("BuiltIns.EnumFunc() error = %v, wantErr %v", err, tt.wantErr)
 				return

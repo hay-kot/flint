@@ -20,6 +20,11 @@ func (fe FileError) Error() string {
 	return fmt.Sprintf("%s: %s", fe.Path, fe.Err)
 }
 
+func IsFileError(err error) bool {
+	var e FileError
+	return errors.As(err, &e)
+}
+
 type FlintErrors map[string][]error
 
 func (fe FlintErrors) Error() string {

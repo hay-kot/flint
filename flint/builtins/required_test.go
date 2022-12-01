@@ -54,7 +54,7 @@ func TestBuiltIns_Required(t *testing.T) {
 					return
 				}
 
-				assert.ErrorAs(t, err, &FieldErrors{})
+				assert.True(t, IsFieldErrors(err))
 			case (err != nil) != tt.wantErr:
 				t.Errorf("BuiltIns.RequiredFunc() error = %v, wantErr %v", err, tt.wantErr)
 				return

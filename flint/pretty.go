@@ -75,8 +75,9 @@ func FmtFileErrors(path string, e []error, optfn ...prettyOptionFunc) string {
 		}
 
 		for _, e := range all {
-			switch err := e.(type) {
-			case builtins.FieldErrors:
+			switch {
+			case builtins.IsFieldErrors(e):
+				err := e.(*builtins.FieldErrors)
 				for _, key := range err.Fields {
 					cols = append(cols, []string{
 						or(key.Line, "0:0"),
@@ -86,7 +87,8 @@ func FmtFileErrors(path string, e []error, optfn ...prettyOptionFunc) string {
 						err.ID,
 					})
 				}
-			case builtins.ValueErrors:
+			case builtins.IsValueErrors(e):
+				err := err.(*builtins.ValueErrors)
 				for _, m := range err.Errors {
 					cols = append(cols, []string{
 						m.Line,
@@ -96,7 +98,8 @@ func FmtFileErrors(path string, e []error, optfn ...prettyOptionFunc) string {
 						err.ID,
 					})
 				}
-			case FileError:
+			case IsFileError(e):
+				err := e.(FileError)
 				cols = append(cols, []string{
 					"0:0",
 					"error",
