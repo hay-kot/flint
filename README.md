@@ -45,8 +45,8 @@ This library is still experimental.
   - Date Format
   - Field Length
   - Disallowed Fields
+  - Asset Existence
   - <s>Field types</s> (coming soon!)
-  - <s>Asset Existence</s> (coming soon!)
 
 ## Installation
 
@@ -203,6 +203,26 @@ Supported types are `string` and `[]string`
         - "keywords"
         - "categories"
         - "tags"
+```
+
+##### `assets`
+
+Checks to see if the filepath defined in the field exists in a relative path to the sources defined in the assets section. This is useful for checking to see if an image exists in a directory.
+
+Supported types are `string` and `[]string`
+
+```yaml
+  FM008:
+    level: error
+    description: "assets required"
+    assets:
+      sources:
+        - "content/"
+        - "static/"
+        - "public/"
+      fields:
+        - image
+        - images
 ```
 
 #### Content

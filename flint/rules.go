@@ -46,6 +46,11 @@ type RuleLength struct {
 	Fields []string `yaml:"fields" json:"fields" toml:"fields"`
 }
 
+type AssetRules struct {
+	Sources []string `yaml:"sources" json:"sources" toml:"sources"`
+	Fields  []string `yaml:"fields" json:"fields" toml:"fields"`
+}
+
 type Rule struct {
 	Description string         `yaml:"description" json:"description" toml:"description"`
 	Level       RuleLevel      `yaml:"level" json:"level" toml:"level"`
@@ -55,6 +60,7 @@ type Rule struct {
 	DateFormat  RuleDateFormat `yaml:"date" json:"date" toml:"date"`
 	Length      RuleLength     `yaml:"length" json:"length" toml:"length"`
 	Disallowed  []string       `yaml:"disallowed" json:"disallowed" toml:"disallowed"`
+	Assets      AssetRules     `yaml:"assets" json:"assets" toml:"assets"`
 }
 
 func (r Rule) Funcs(id string) []builtins.Checker {
@@ -83,6 +89,10 @@ func (r Rule) Funcs(id string) []builtins.Checker {
 
 	if len(r.Length.Fields) > 0 {
 		funcs = append(funcs, check.LengthFunc(r.Length.Min, r.Length.Max, r.Length.Fields))
+	}
+
+	if len(r.Assets.Fields) > 0 {
+		funcs = append(funcs, check.AssetsFunc(r.Assets.Fields, r.Assets.Sources))
 	}
 
 	return funcs
