@@ -3,7 +3,7 @@ module github.com/hay-kot/flint
 go 1.19
 
 require (
-	github.com/bmatcuk/doublestar/v4 v4.4.0
+	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/charmbracelet/lipgloss v0.6.0
 	github.com/pelletier/go-toml/v2 v2.0.6
 	github.com/stretchr/testify v1.8.1
