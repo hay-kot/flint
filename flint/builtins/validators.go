@@ -74,60 +74,34 @@ func (b BuiltIns) TypeCheck(fields []string, typeDef map[string]string) Checker 
 	return func(fm *frontmatter.FrontMatter) error {
 		errors := newValueErrors(b.ID, b.Level, b.Description)
 
-		for _, field := range fields {
-			v, ok := fm.Get(field)
-			if !ok {
-				continue
+		stringMap := func(field string, m map[string]string, idx int) {
+			err := checkStruct(fillStruct(t, m))
+
+			if err == nil { // inverted guard
+				return
 			}
 
-			check := func(m map[string]string, idx int) {
-				err := checkStruct(fillStruct(t, m))
-				if err != nil {
-					validationErrors := err.(validator.ValidationErrors)
-					line, y := fm.KeyCords(field)
+			validationErrors := err.(validator.ValidationErrors)
+			line, y := fm.KeyCords(field)
 
-					for _, e := range validationErrors {
-						localField := strings.ToLower(e.Field())
+			for _, e := range validationErrors {
+				localField := strings.ToLower(e.Field())
 
-						fieldPath := fmt.Sprintf("%s.%s", field, localField)
+				fieldPath := fmt.Sprintf("%s.%s", field, localField)
 
-						ve := newValueError(line, y, fieldPath, idx)
-						if idx != -1 {
-							ve.Field = fmt.Sprintf("%s[%d].%s", field, idx, localField)
-						}
-
-						ve.Description = fmt.Sprintf("failed on tag '%s'", e.ActualTag())
-						errors.Errors = append(errors.Errors, ve)
-					}
-				}
-			}
-
-			switch v := v.(type) {
-			case map[string]interface{}:
-				m, ok := toMapStr(v)
-				if !ok {
-					continue
+				ve := newValueError(line, y, fieldPath, idx)
+				if idx != -1 {
+					ve.Field = fmt.Sprintf("%s[%d].%s", field, idx, localField)
 				}
 
-				check(m, -1)
-			case []interface{}:
-				var mapSlice []map[string]string
-
-				for _, v := range v {
-					m, ok := toMapStr(v.(map[string]interface{}))
-					if !ok {
-						continue
-					}
-					mapSlice = append(mapSlice, m)
-				}
-
-				for i, m := range mapSlice {
-					check(m, i)
-				}
-			default:
-				continue
+				ve.Description = fmt.Sprintf("failed on tag '%s'", e.ActualTag())
+				errors.Errors = append(errors.Errors, ve)
 			}
 		}
+
+		l := looper{stringMap: stringMap}
+
+		l.Do(fields, fm)
 
 		if len(errors.Errors) > 0 {
 			return errors

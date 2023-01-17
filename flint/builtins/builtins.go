@@ -1,6 +1,8 @@
 package builtins
 
-import "github.com/hay-kot/flint/pkgs/frontmatter"
+import (
+	"github.com/hay-kot/flint/pkgs/frontmatter"
+)
 
 type Checker func(fm *frontmatter.FrontMatter) error
 
@@ -16,6 +18,10 @@ func New(id, level, desc string) BuiltIns {
 		Level:       level,
 		Description: desc,
 	}
+}
+
+func (b BuiltIns) valueError() *ValueErrors {
+	return newValueErrors(b.ID, b.Level, b.Description)
 }
 
 // stringCheckFactory is a helper function that creates a Checker for a given field. It
