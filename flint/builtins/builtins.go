@@ -18,9 +18,9 @@ func New(id, level, desc string) BuiltIns {
 	}
 }
 
-// valueCheckerFactory is a helper function that creates a Checker for a given field. It
+// stringCheckFactory is a helper function that creates a Checker for a given field. It
 // uses the given function to check the value of the field.
-func (b BuiltIns) valueCheckerFactory(fields []string, f func(v string) bool) Checker {
+func (b BuiltIns) stringCheckFactory(fields []string, f func(v string) bool) Checker {
 	return func(fm *frontmatter.FrontMatter) error {
 		errors := newValueErrors(b.ID, b.Level, b.Description)
 

@@ -23,6 +23,8 @@ const (
 	YAML ConfigFormat = "yaml"
 )
 
+type TypeDef = map[string]string
+
 type Content struct {
 	Name  string   `yaml:"name" toml:"name" json:"name"`
 	Paths []string `yaml:"paths" toml:"paths" json:"paths"`
@@ -30,8 +32,9 @@ type Content struct {
 }
 
 type Config struct {
-	Rules   map[string]Rule `yaml:"rules" toml:"rules" json:"rules"`
-	Content []Content       `yaml:"content" toml:"content" json:"content"`
+	Types   map[string]TypeDef `yaml:"types" toml:"types" json:"types"`
+	Rules   map[string]Rule    `yaml:"rules" toml:"rules" json:"rules"`
+	Content []Content          `yaml:"content" toml:"content" json:"content"`
 }
 
 func ReadConfig(r io.Reader, format ConfigFormat) (*Config, error) {
@@ -74,13 +77,12 @@ func (conf *Config) Run(cwd string) (int, error) {
 			for i, m := range relmatches {
 				matches[i] = filepath.Join(root, m)
 			}
-
 		}
 
 		allChecks := make([]builtins.Checker, 0, len(c.Rules))
 
 		for _, r := range c.Rules {
-			allChecks = append(allChecks, conf.Rules[r].Funcs(r)...)
+			allChecks = append(allChecks, conf.Rules[r].Funcs(r, conf.Types)...)
 		}
 
 		for _, m := range matches {

@@ -51,6 +51,11 @@ type AssetRules struct {
 	Fields  []string `yaml:"fields" json:"fields" toml:"fields"`
 }
 
+type TypeRule struct {
+	Type   string   `yaml:"name" json:"name" toml:"name"`
+	Fields []string `yaml:"fields" json:"fields" toml:"fields"`
+}
+
 type Rule struct {
 	Description string         `yaml:"description" json:"description" toml:"description"`
 	Level       RuleLevel      `yaml:"level" json:"level" toml:"level"`
@@ -61,9 +66,10 @@ type Rule struct {
 	Length      RuleLength     `yaml:"length" json:"length" toml:"length"`
 	Disallowed  []string       `yaml:"disallowed" json:"disallowed" toml:"disallowed"`
 	Assets      AssetRules     `yaml:"assets" json:"assets" toml:"assets"`
+	Type        TypeRule       `yaml:"type" json:"type" toml:"type"`
 }
 
-func (r Rule) Funcs(id string) []builtins.Checker {
+func (r Rule) Funcs(id string, types map[string]TypeDef) []builtins.Checker {
 	check := builtins.New(id, string(r.Level), r.Description)
 	var funcs []builtins.Checker
 
@@ -93,6 +99,10 @@ func (r Rule) Funcs(id string) []builtins.Checker {
 
 	if len(r.Assets.Fields) > 0 {
 		funcs = append(funcs, check.AssetsFunc(r.Assets.Fields, r.Assets.Sources))
+	}
+
+	if len(r.Type.Fields) > 0 {
+		funcs = append(funcs, check.TypeCheck(r.Type.Fields, types[r.Type.Type]))
 	}
 
 	return funcs
