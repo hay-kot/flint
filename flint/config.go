@@ -54,6 +54,16 @@ func ReadConfig(r io.Reader, format ConfigFormat) (*Config, error) {
 	return &c, err
 }
 
+// Run is the core data processing pipeline like function that performs the following
+// for each conf.Content:
+//
+//  1. Compiles a list of all files that match the glob patterns
+//  2. Transforms that list into a list of Absolute Paths
+//  3. Compiles the list of rules to be applied to each file
+//
+// For Each File:
+//  1. Read the frontmatter file into a frontmatter.FrontMatter struct
+//  2. Apply the rules to the frontmatter.FrontMatter struct
 func (conf *Config) Run(cwd string) (int, error) {
 	errs := make(FlintErrors)
 
@@ -93,15 +103,10 @@ func (conf *Config) Run(cwd string) (int, error) {
 					Path: m,
 					Err:  err,
 				})
+				continue
 			}
 
 			fm, err := frontmatter.Read(f)
-			fCloseErr := f.Close()
-
-			if fCloseErr != nil {
-				panic(err)
-			}
-
 			if err != nil {
 				if errors.Is(err, frontmatter.ErrNoFrontMatter) {
 					errs[m] = append(errs[m], FileError{
@@ -114,12 +119,16 @@ func (conf *Config) Run(cwd string) (int, error) {
 				return 0, fmt.Errorf("failed to read frontmatter unknown error: %w", err)
 			}
 
-			for _, check := range allChecks {
-				err := check(fm)
-				if err != nil {
-					errs[m] = append(errs[m], err)
-				}
+			err = f.Close()
+			if err != nil {
+				errs[m] = append(errs[m], FileError{
+					Path: m,
+					Err:  fmt.Errorf("failed to close file: %w", err),
+				})
+				continue
 			}
+
+			errs[m] = append(errs[m], Apply(fm, allChecks)...)
 		}
 	}
 
@@ -128,4 +137,16 @@ func (conf *Config) Run(cwd string) (int, error) {
 	}
 
 	return total, nil
+}
+
+func Apply(fm *frontmatter.FrontMatter, rules []builtins.Checker) []error {
+	var errs []error
+	for _, rule := range rules {
+		err := rule(fm)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	return errs
 }
