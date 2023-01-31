@@ -12,8 +12,12 @@ func checkStruct(v interface{}) error {
 	return validate.Struct(v)
 }
 
-// fillStruct copies the reflect value of a struct and fills it with the values
+// ensureExported ensures that the first letter of the key is capitalized.
 func ensureExported(key string) string {
+	if key == "" {
+		return key
+	}
+
 	if key[0] >= 'a' && key[0] <= 'z' {
 		key = string(key[0]+'A'-'a') + key[1:]
 	}
@@ -49,6 +53,9 @@ func createStruct(fields map[string]string) reflect.Value {
 // fillStruct copies the reflect value of a struct and fills it with the values
 // from the fields map. It automatically capitalizes the first letter of the
 // field name in the map if it is not already capitalized.
+//
+// structValue should be a pointer to a struct, the easiest way to ensure this
+// is to use the createStruct function to create the struct.
 func fillStruct(structValue reflect.Value, fields map[string]string) interface{} {
 	structValue = reflect.New(structValue.Elem().Type())
 
@@ -65,6 +72,6 @@ func fillStruct(structValue reflect.Value, fields map[string]string) interface{}
 		structValue.Elem().FieldByName(key).SetString(value)
 	}
 
-	// Return the struct as an interface{}
-	return structValue.Interface()
+	// Unwrap Pointer
+	return structValue.Elem().Interface()
 }
