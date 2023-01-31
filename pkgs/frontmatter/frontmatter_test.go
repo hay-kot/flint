@@ -204,7 +204,6 @@ nested:
 }
 
 func TestFrontMatter_Data(t *testing.T) {
-
 	tests := []struct {
 		name string
 		args io.Reader

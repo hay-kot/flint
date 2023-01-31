@@ -6,7 +6,7 @@ import (
 )
 
 // RequiredFunc is a builtin rule for flint the allows the user/caller to specify a
-// set of Required keys in the frontmatter. These respect dot seperated keys.
+// set of Required keys in the frontmatter. These respect dot separated keys.
 // so you can require nested keys by providing "author.name" as a key.
 func (b BuiltIns) RequiredFunc(required []string) Checker {
 	requiredSet := set.New(required...)

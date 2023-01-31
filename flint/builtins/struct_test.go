@@ -45,5 +45,4 @@ func TestCreateStruct(t *testing.T) {
 
 	println(checkStruct(v) == nil)
 	println(checkStruct(v2) == nil)
-
 }

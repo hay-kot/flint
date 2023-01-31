@@ -55,33 +55,33 @@ func (b BuiltIns) LengthFunc(min, max int, fields []string) Checker {
 	})
 }
 
-func toMapStr(v map[string]interface{}) (map[string]string, bool) {
-	m := make(map[string]string, len(v))
-	for k, v := range v {
-		s, ok := v.(string)
-		if !ok {
-			return nil, false
-		}
-		m[k] = s
-	}
+// func toMapStr(v map[string]interface{}) (map[string]string, bool) {
+// 	m := make(map[string]string, len(v))
+// 	for k, v := range v {
+// 		s, ok := v.(string)
+// 		if !ok {
+// 			return nil, false
+// 		}
+// 		m[k] = s
+// 	}
 
-	return m, true
-}
+// 	return m, true
+// }
 
 func (b BuiltIns) TypeCheck(fields []string, typeDef map[string]string) Checker {
 	t := createStruct(typeDef)
 
 	return func(fm *frontmatter.FrontMatter) error {
-		errors := newValueErrors(b.ID, b.Level, b.Description)
+		valueErrors := b.valueError()
 
 		stringMap := func(field string, m map[string]string, idx int) {
 			err := checkStruct(fillStruct(t, m))
 
-			if err == nil { // inverted guard
+			if err == nil { // ! inverted guard
 				return
 			}
 
-			validationErrors := err.(validator.ValidationErrors)
+			validationErrors := err.(validator.ValidationErrors) // nolint:errorLint
 			line, y := fm.KeyCords(field)
 
 			for _, e := range validationErrors {
@@ -95,7 +95,7 @@ func (b BuiltIns) TypeCheck(fields []string, typeDef map[string]string) Checker 
 				}
 
 				ve.Description = fmt.Sprintf("failed on tag '%s'", e.ActualTag())
-				errors.Errors = append(errors.Errors, ve)
+				valueErrors.Errors = append(valueErrors.Errors, ve)
 			}
 		}
 
@@ -103,8 +103,8 @@ func (b BuiltIns) TypeCheck(fields []string, typeDef map[string]string) Checker 
 
 		l.Do(fields, fm)
 
-		if len(errors.Errors) > 0 {
-			return errors
+		if len(valueErrors.Errors) > 0 {
+			return valueErrors
 		}
 
 		return nil

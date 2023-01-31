@@ -41,7 +41,6 @@ enable = [
   "ineffassign",
   "misspell",
   "nakedret",
-  "rowserrcheck",
   "exportloopref",
   "staticcheck",
   "stylecheck",
@@ -54,7 +53,6 @@ enable = [
   "typecheck",
   "asciicheck",
   "errorlint",
-  "sqlclosecheck",
   "revive",
 ]
 

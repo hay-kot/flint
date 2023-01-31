@@ -1,3 +1,4 @@
+// Package builtins contains the built-in rules for flint.
 package builtins
 
 import (
@@ -28,7 +29,7 @@ func (b BuiltIns) valueError() *ValueErrors {
 // uses the given function to check the value of the field.
 func (b BuiltIns) stringCheckFactory(fields []string, f func(v string) bool) Checker {
 	return func(fm *frontmatter.FrontMatter) error {
-		errors := newValueErrors(b.ID, b.Level, b.Description)
+		errors := b.valueError()
 
 		for _, field := range fields {
 			v, ok := fm.Get(field)

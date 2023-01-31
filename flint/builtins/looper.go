@@ -89,6 +89,5 @@ func (l *looper) Do(fields []string, fm *frontmatter.FrontMatter) {
 
 			l.stringMap(field, m, -1)
 		}
-
 	}
 }

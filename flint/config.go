@@ -1,3 +1,4 @@
+// Package flint contains the core logic for flint.
 package flint
 
 import (
@@ -95,7 +96,11 @@ func (conf *Config) Run(cwd string) (int, error) {
 			}
 
 			fm, err := frontmatter.Read(f)
-			f.Close()
+			fCloseErr := f.Close()
+
+			if fCloseErr != nil {
+				panic(err)
+			}
 
 			if err != nil {
 				if errors.Is(err, frontmatter.ErrNoFrontMatter) {
@@ -115,7 +120,6 @@ func (conf *Config) Run(cwd string) (int, error) {
 					errs[m] = append(errs[m], err)
 				}
 			}
-
 		}
 	}
 

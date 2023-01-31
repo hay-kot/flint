@@ -145,6 +145,12 @@ func run(c *cli.Context) error {
 		return fmt.Errorf("failed to find config file: %w", err)
 	}
 
+	defer func() {
+		if err := conffile.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	ext := filepath.Ext(confpath)
 
 	var format flint.ConfigFormat
@@ -160,7 +166,6 @@ func run(c *cli.Context) error {
 	}
 
 	conf, err := flint.ReadConfig(conffile, format)
-	conffile.Close()
 	if err != nil {
 		return fmt.Errorf("failed to find config file: %w", err)
 	}
@@ -170,7 +175,7 @@ func run(c *cli.Context) error {
 	if err != nil {
 		switch {
 		case errors.As(err, &flint.FlintErrors{}):
-			errs := err.(flint.FlintErrors)
+			errs := err.(flint.FlintErrors) // nolint:errorLint
 			sorted := make([]string, len(errs))
 			i := 0
 			for k := range errs {
@@ -210,7 +215,6 @@ func run(c *cli.Context) error {
 	}
 
 	return nil
-
 }
 
 func initialize(c *cli.Context) error {

@@ -1,3 +1,5 @@
+// Package set implements a very basic set data structure. It is immutable and
+// provides some helper methods specifically for working with the flint
 package set
 
 type ImmutableSet[T key] struct {
@@ -23,7 +25,6 @@ func (s *ImmutableSet[T]) Intersection(o *Set[T]) *ImmutableSet[T] {
 	return &ImmutableSet[T]{
 		s: s.s.Intersection(o),
 	}
-
 }
 
 func (s *ImmutableSet[T]) Missing(o *Set[T]) *ImmutableSet[T] {
