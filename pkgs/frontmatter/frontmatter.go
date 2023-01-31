@@ -1,3 +1,4 @@
+// Package frontmatter provides a simple interface to read and write front matter.
 package frontmatter
 
 import (
@@ -54,6 +55,8 @@ func Read(r io.Reader) (fm *FrontMatter, err error) {
 	yamlNode := yaml.Node{}
 
 	switch fmFormat {
+	case formatUnknown:
+		return nil, ErrNoFrontMatter
 	case formatTOML:
 		err = toml.Unmarshal(content, &data)
 	case formatYAML:
@@ -89,6 +92,8 @@ func (fm *FrontMatter) KeyCords(key string) (line int, col int) {
 	}
 
 	switch fm.format {
+	case formatUnknown:
+		return -1, -1
 	case formatTOML:
 		return -1, -1
 	case formatYAML:
