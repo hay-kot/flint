@@ -7,7 +7,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.6.0
 	github.com/pelletier/go-toml/v2 v2.0.8
 	github.com/stretchr/testify v1.8.3
-	github.com/urfave/cli/v2 v2.25.3
+	github.com/urfave/cli/v2 v2.25.4
 	gopkg.in/yaml.v3 v3.0.1
 )
 
